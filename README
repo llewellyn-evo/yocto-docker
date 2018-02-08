@@ -1,0 +1,30 @@
+== Docker/Yocto Build System Setup ==
+This project helps make build system for embedded platform by using
+docker (https://www.docker.com) and yocto (https://www.yoctoproject.org/)
+with distro poky (https://www.yoctoproject.org/tools-resources/projects/poky)
+
+=== Quick Start ===
+This will setup docker image 'crops/poky', download yocto and meta layers,
+setup local config and run building image 'core-image-minimal' and sdk for
+machine 'sama5d2-roadrunner-evomini2'.
+
+$ make all
+
+Result binaries and images can be founded in directory build-evo/tmp/deploy/
+
+Build binaries and images another machine
+$ make all MACHIME=qemux86
+
+=== Usefull commands ===
+Show help with usefull targets and tips
+$ make help
+
+Invoke shell with inside docker container.
+$ make devshell
+
+Build image 'core-image-minimal' inside developer shell
+devshell$ bitbake core-image-minimal
+
+Build package 'at91bootstrap' inside developer shell
+devshell$ bitbake at91bootstrap
+
