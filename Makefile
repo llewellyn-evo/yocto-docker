@@ -46,7 +46,8 @@ help:
 	@echo 'Result binaryes and images you can find at $(BUILD_DIR)/tmp/deploy/'
 
 all: build-poky-container sources layers $(BUILD_DIR) configure
-	$(DOCKER_RUN) --cmd "bitbake $(IMAGE_NAME) meta-toolchain"
+	$(DOCKER_RUN) --cmd "bitbake $(IMAGE_NAME)"
+	@echo 'Result binaryes and images you can find at $(BUILD_DIR)/tmp/deploy/'
 
 devshell: build-poky-container sources layers $(BUILD_DIR) configure
 	$(DOCKER_RUN)
