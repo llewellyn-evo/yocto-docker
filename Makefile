@@ -14,6 +14,7 @@ DOCKER_IMAGE 	= crops/poky
 DOCKER_REPO 	= debian-9 
 
 DOCKER_RUN		= docker run -it --rm -v $$(pwd):$(DOCKER_WORK_DIR) \
+					--name="$(MACHINE)"								\
 					$(DOCKER_IMAGE):$(DOCKER_REPO) 					\
 					--workdir=$(DOCKER_WORK_DIR)/$(BUILD_DIR) 
 
