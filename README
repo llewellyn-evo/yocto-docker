@@ -13,7 +13,10 @@ $ make all
 Result binaries and images can be founded in directory build-evo/tmp/deploy/
 
 Build binaries and images another machine
-$ make all MACHIME=qemux86
+$ make MACHIME=qemux86 all
+
+Build binaries and images for RoadRunner on BertaD2 baseboard in separate build directory
+$ make MACHINE=sama5d2-roadrunner-bertad2-qspi BUILD_DIR=build-bertad2-qspi IMAGE_NAME=acme-minimal-image all
 
 === Usefull commands ===
 Show help with usefull targets and tips
@@ -28,3 +31,9 @@ devshell$ bitbake core-image-minimal
 Build package 'at91bootstrap' inside developer shell
 devshell$ bitbake at91bootstrap
 
+Rebuld kernel inside developer shell
+devshell$ bitbake virtual/kernel -fc clean
+devshell$ bitbake virtual/kernel
+
+Rebuld .dts (device tree) inside developer shell
+devshell$ bitbake virtual/kernel -fc deploy
