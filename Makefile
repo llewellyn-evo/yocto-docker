@@ -8,6 +8,7 @@ IMAGE_NAME		= core-image-minimal
 BUILD_DIR 	  	= build
 YOCTO_RELEASE 	= rocko
 LAYERS		   += https://github.com/evologics/meta-evo		\
+				  https://github.com/ramok/meta-acme		\
 				  https://github.com/linux4sam/meta-atmel
 
 DOCKER_IMAGE 	= crops/poky
