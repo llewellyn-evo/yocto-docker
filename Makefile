@@ -81,6 +81,12 @@ $(BUILD_DIR)/conf/local.conf:
 	echo 'MACHINE = "$(MACHINE)"' 			>> $(BUILD_DIR)/conf/local.conf
 	echo 'PACKAGE_CLASSES = "package_ipk"'  >> $(BUILD_DIR)/conf/local.conf
 
+clean-images:
+	rm -rf $(BUILD_DIR)/tmp/deploy
+
+cleanall:
+	rm -rf $(BUILD_DIR)/tmp $(BUILD_DIR)/sstate-cache
+
 distclean:
 	rm -rf $(BUILD_DIR) $(SOURCES_DIR) poky-container
 
