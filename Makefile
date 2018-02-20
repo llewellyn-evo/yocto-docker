@@ -4,6 +4,9 @@
 
 MACHINE 		= sama5d2-roadrunner-evomini2
 IMAGE_NAME		= core-image-minimal
+LOCAL_CONF_OPT	= 'MACHINE			= "$(MACHINE)"'	\
+				  'PACKAGE_CLASSES	= "package_ipk"'\
+				   'TCLIBC			= "musl"'
 
 BUILD_DIR 	  	= build
 YOCTO_RELEASE 	= rocko
@@ -77,10 +80,12 @@ configure: $(BUILD_DIR)/conf/local.conf
 
 $(BUILD_DIR)/conf/local.conf:
 	$(DOCKER_RUN) --cmd "cd $(DOCKER_WORK_DIR)/$(SOURCES_DIR) && source oe-init-build-env $(DOCKER_WORK_DIR)/$(BUILD_DIR)" 
-	$(DOCKER_RUN) --cmd "bitbake-layers add-layer $(DOCKER_WORK_DIR)/$(SOURCES_DIR)/meta-atmel" 
-	$(DOCKER_RUN) --cmd "bitbake-layers add-layer $(DOCKER_WORK_DIR)/$(SOURCES_DIR)/meta-evo"
-	echo 'MACHINE = "$(MACHINE)"' 			>> $(BUILD_DIR)/conf/local.conf
-	echo 'PACKAGE_CLASSES = "package_ipk"'  >> $(BUILD_DIR)/conf/local.conf
+	for LAYER in $(LAYERS_DIR); do \
+		$(DOCKER_RUN) --cmd "bitbake-layers add-layer $(DOCKER_WORK_DIR)/$$LAYER"; \
+	done
+	for OPT in $(LOCAL_CONF_OPT); do \
+		echo $$OPT;					 \
+	done >> $(BUILD_DIR)/conf/local.conf
 
 clean-images:
 	rm -rf $(BUILD_DIR)/tmp/deploy
