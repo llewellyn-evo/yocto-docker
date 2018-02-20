@@ -47,6 +47,9 @@ help:
 	@echo 'And then build:'
 	@echo 'bitbake core-image-minimal meta-toolchain'
 	@echo ''
+	@echo 'TIPS:'
+	@echo 'Build binaries and images for RoadRunner on BertaD2 baseboard in separate build directory'
+	@echo '$$ make MACHINE=sama5d2-roadrunner-bertad2-qspi BUILD_DIR=build-bertad2-qspi IMAGE_NAME=acme-minimal-image all'
 	@echo 'Result binaryes and images you can find at $(BUILD_DIR)/tmp/deploy/'
 
 all: build-poky-container sources layers $(BUILD_DIR) configure
