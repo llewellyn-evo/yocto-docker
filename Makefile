@@ -1,29 +1,29 @@
-# Docker/Yocto Build System Setup 
-# 	by komar@evologics.de 2018 Evologics GmbH
+# Docker/Yocto Build System Setup
+#     by komar@evologics.de 2018 Evologics GmbH
 # This project helps make build system for embedded platform by using docker and yocto.
 
-MACHINE 		= sama5d2-roadrunner-evomini2
-IMAGE_NAME		= core-image-minimal
-LOCAL_CONF_OPT	= 'MACHINE			= "$(MACHINE)"'	\
-				  'PACKAGE_CLASSES	= "package_ipk"'\
-				   'TCLIBC			= "musl"'
+MACHINE           = sama5d2-roadrunner-evomini2
+IMAGE_NAME        = core-image-minimal
+LOCAL_CONF_OPT    = 'MACHINE            = "$(MACHINE)"'    \
+                    'PACKAGE_CLASSES    = "package_ipk"'   \
+                    'TCLIBC             = "musl"'
 
-BUILD_DIR 	  	= build
-YOCTO_RELEASE 	= rocko
-LAYERS		   += https://github.com/evologics/meta-evo		\
-				  https://github.com/ramok/meta-acme		\
-				  https://github.com/linux4sam/meta-atmel
+BUILD_DIR         = build
+YOCTO_RELEASE     = rocko
+LAYERS           += https://github.com/evologics/meta-evo        \
+                    https://github.com/ramok/meta-acme           \
+                    https://github.com/linux4sam/meta-atmel
 
-DOCKER_IMAGE 	= crops/poky
-DOCKER_REPO 	= debian-9 
+DOCKER_IMAGE      = crops/poky
+DOCKER_REPO       = debian-9
 
-DOCKER_RUN		= docker run -it --rm -v $$(pwd):$(DOCKER_WORK_DIR) \
-					--name="$(MACHINE)"								\
-					$(DOCKER_IMAGE):$(DOCKER_REPO) 					\
-					--workdir=$(DOCKER_WORK_DIR)/$(BUILD_DIR) 
+DOCKER_RUN        = docker run -it --rm -v $$(pwd):$(DOCKER_WORK_DIR)  \
+                    --name="$(MACHINE)"                                \
+                    $(DOCKER_IMAGE):$(DOCKER_REPO)                     \
+                    --workdir=$(DOCKER_WORK_DIR)/$(BUILD_DIR)
 
 DOCKER_WORK_DIR = /work
-SOURCES_DIR 	= sources/
+SOURCES_DIR 	= sources
 
 # get layer name from url
 LAYERS_DIR := $(addprefix $(SOURCES_DIR)/,$(foreach name, $(LAYERS), $(lastword $(subst /,  ,$(name)))))
