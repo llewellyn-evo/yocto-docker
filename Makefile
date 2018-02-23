@@ -11,12 +11,14 @@ LOCAL_CONF_OPT    = 'MACHINE            = "$(MACHINE)"'    \
 BUILD_DIR         = build
 YOCTO_RELEASE     = rocko
 
-# Layers to download and add to the configuration
+# Layers to download and add to the configuration.
+# Layers must me in right order, layers used by other layers must become first.
 # Syntax: url[;option1=value;option2=value]
 # Possible options: branch=<branch-to-clone>
-LAYERS           += https://github.com/evologics/meta-evo        \
-                    https://github.com/ramok/meta-acme           \
-                    https://github.com/linux4sam/meta-atmel
+LAYERS           += https://github.com/linux4sam/meta-atmel      \
+                    https://github.com/evologics/meta-evo        \
+                    https://github.com/ramok/meta-acme
+                    
 
 DOCKER_IMAGE      = crops/poky
 DOCKER_REPO       = debian-9
