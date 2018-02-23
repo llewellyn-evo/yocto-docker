@@ -9,6 +9,9 @@ LOCAL_CONF_OPT    = 'MACHINE            = "$(MACHINE)"'    \
                     'TCLIBC             = "musl"'
 
 BUILD_DIR         = build
+
+# If layer branch not set with "branch=" option, YOCTO_RELEASE will be used.
+# If layer has no such branch, 'master' branch # will be used.
 YOCTO_RELEASE     = rocko
 
 # Layers to download and add to the configuration.
@@ -37,6 +40,7 @@ $(foreach line, $(addprefix url=, $(LAYERS)),                               \
         $(eval name := $(lastword $(subst /,  ,$(firstword $(line_sep)))))  \
         $(eval LAYERS_DIR += $(addprefix $(SOURCES_DIR)/, $(name)))         \
         $(foreach property, $(line_sep), $(eval LAYER_$(name)_$(property))) \
+        $(eval LAYER_$(name)_branch ?= $(YOCTO_RELEASE))                    \
  )
 
 .PHONY: distclean help
@@ -82,8 +86,8 @@ $(SOURCES_DIR):
 layers: $(LAYERS_DIR)
 
 $(LAYERS_DIR):
-	$(eval LAYER_$(@F)_branch ?= $(YOCTO_RELEASE))
-	cd $(SOURCES_DIR) && git clone -b $(LAYER_$(@F)_branch) $(LAYER_$(@F)_url) || exit 0
+	cd $(SOURCES_DIR) && \
+		(git clone -b $(LAYER_$(@F)_branch) $(LAYER_$(@F)_url) || git clone $(LAYER_$(@F)_url))
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
