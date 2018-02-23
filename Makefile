@@ -1,35 +1,41 @@
-# Docker/Yocto Build System Setup 
-# 	by komar@evologics.de 2018 Evologics GmbH
+# Docker/Yocto Build System Setup
+#     by komar@evologics.de 2018 Evologics GmbH
 # This project helps make build system for embedded platform by using docker and yocto.
 
-MACHINE 		= sama5d2-roadrunner-evomini2
-IMAGE_NAME		= core-image-minimal
-LOCAL_CONF_OPT	= 'MACHINE			= "$(MACHINE)"'	\
-				  'PACKAGE_CLASSES	= "package_ipk"'\
-				   'TCLIBC			= "musl"'
+MACHINE           = sama5d2-roadrunner-evomini2
+IMAGE_NAME        = core-image-minimal
+LOCAL_CONF_OPT    = 'MACHINE            = "$(MACHINE)"'    \
+                    'PACKAGE_CLASSES    = "package_ipk"'   \
+                    'TCLIBC             = "musl"'
 
-BUILD_DIR 	  	= build
-YOCTO_RELEASE 	= rocko
-LAYERS		   += https://github.com/evologics/meta-evo		\
-				  https://github.com/ramok/meta-acme		\
-				  https://github.com/linux4sam/meta-atmel
+BUILD_DIR         = build
+YOCTO_RELEASE     = rocko
 
-DOCKER_IMAGE 	= crops/poky
-DOCKER_REPO 	= debian-9 
+# Layers to download and add to the configuration
+# Syntax: url[;option1=value;option2=value]
+# Possible options: branch=<branch-to-clone>
+LAYERS           += https://github.com/evologics/meta-evo        \
+                    https://github.com/ramok/meta-acme           \
+                    https://github.com/linux4sam/meta-atmel
 
-DOCKER_RUN		= docker run -it --rm -v $$(pwd):$(DOCKER_WORK_DIR) \
-					--name="$(MACHINE)"								\
-					$(DOCKER_IMAGE):$(DOCKER_REPO) 					\
-					--workdir=$(DOCKER_WORK_DIR)/$(BUILD_DIR) 
+DOCKER_IMAGE      = crops/poky
+DOCKER_REPO       = debian-9
+
+DOCKER_RUN        = docker run -it --rm -v $$(pwd):$(DOCKER_WORK_DIR)  \
+                    --name="$(MACHINE)"                                \
+                    $(DOCKER_IMAGE):$(DOCKER_REPO)                     \
+                    --workdir=$(DOCKER_WORK_DIR)/$(BUILD_DIR)
 
 DOCKER_WORK_DIR = /work
-SOURCES_DIR 	= sources/
+SOURCES_DIR 	= sources
 
-# get layer name from url
-LAYERS_DIR := $(addprefix $(SOURCES_DIR)/,$(foreach name, $(LAYERS), $(lastword $(subst /,  ,$(name)))))
-
-# make variables LAYER_URL_layer-name equal to url
-$(foreach name, $(LAYERS), $(eval LAYER_URL_$(lastword $(subst /,  ,$(name))) := $(name)))
+# Iterate over lines in LAYERS and fill necessary variables
+$(foreach line, $(addprefix url=, $(LAYERS)),                               \
+        $(eval line_sep = $(subst ;,  ,$(line)))                            \
+        $(eval name := $(lastword $(subst /,  ,$(firstword $(line_sep)))))  \
+        $(eval LAYERS_DIR += $(addprefix $(SOURCES_DIR)/, $(name)))         \
+        $(foreach property, $(line_sep), $(eval LAYER_$(name)_$(property))) \
+ )
 
 .PHONY: distclean help
 
@@ -74,7 +80,8 @@ $(SOURCES_DIR):
 layers: $(LAYERS_DIR)
 
 $(LAYERS_DIR):
-	cd $(SOURCES_DIR) && git clone -b $(YOCTO_RELEASE) $(LAYER_URL_$(@F)) || exit 0
+	$(eval LAYER_$(@F)_branch ?= $(YOCTO_RELEASE))
+	cd $(SOURCES_DIR) && git clone -b $(LAYER_$(@F)_branch) $(LAYER_$(@F)_url) || exit 0
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
