@@ -19,8 +19,8 @@ YOCTO_RELEASE     = rocko
 # Syntax: url[;option1=value;option2=value]
 # Possible options: branch=<branch-to-clone>
 LAYERS           += https://github.com/linux4sam/meta-atmel      \
-                    https://github.com/evologics/meta-evo        \
-                    https://github.com/ramok/meta-acme
+                    https://github.com/ramok/meta-acme        	 \
+                    https://github.com/evologics/meta-evo
                     
 
 DOCKER_IMAGE      = crops/poky
