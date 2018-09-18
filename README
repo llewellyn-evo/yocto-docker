@@ -37,3 +37,10 @@ devshell$ bitbake virtual/kernel
 
 Rebuld .dts (device tree) inside developer shell
 devshell$ bitbake virtual/kernel -fc deploy
+
+Rebuild only ubi image
+devshell$ bitbake evologics-base-image -fc image_ubi && bitbake evologics-base-image
+devshell$ bitbake acme-minimal-image -fc image_ubi && bitbake acme-minimal-image
+devshell$ bitbake acme-minimal-image -fc clean && bitbake acme-minimal-image
+
+Usefull bitbake commands: https://github.com/gumstix/yocto-manifest/wiki#useful-bitbake-commands
