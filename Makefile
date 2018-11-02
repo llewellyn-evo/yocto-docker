@@ -17,11 +17,13 @@ YOCTO_RELEASE     = rocko
 # Layers to download and add to the configuration.
 # Layers must me in right order, layers used by other layers must become first.
 # Syntax: url[;option1=value;option2=value]
-# Possible options: branch=<branch-to-clone>
+# Possible options:
+# 	* branch=<branch-to-clone>
+# 	* subdirs=<subdirectory with meta-leyer>[,<subdirectory with meta-leyer>]
 LAYERS           += https://github.com/linux4sam/meta-atmel      \
-                    https://github.com/ramok/meta-acme        	 \
-                    https://github.com/evologics/meta-evo
-                    
+                    https://github.com/ramok/meta-acme           \
+                    https://github.com/evologics/meta-evo        \
+                    git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-webserver,meta-networking
 
 DOCKER_IMAGE      = crops/poky
 DOCKER_REPO       = debian-9
@@ -34,12 +36,26 @@ DOCKER_RUN        = docker run -it --rm -v $$(pwd):$(DOCKER_WORK_DIR)  \
 DOCKER_WORK_DIR = /work
 SOURCES_DIR 	= sources
 
+comma := ,
 # Iterate over lines in LAYERS and fill necessary variables
 $(foreach line, $(addprefix url=, $(LAYERS)),                               \
         $(eval line_sep = $(subst ;,  ,$(line)))                            \
         $(eval name := $(lastword $(subst /,  ,$(firstword $(line_sep)))))  \
-        $(eval LAYERS_DIR += $(addprefix $(SOURCES_DIR)/, $(name)))         \
-        $(foreach property, $(line_sep), $(eval LAYER_$(name)_$(property))) \
+        $(foreach property, $(line_sep),                                    \
+            $(eval LAYER_$(name)_$(property))                               \
+        )                                                                   \
+                                                                            \
+        $(eval dir := $(addprefix $(SOURCES_DIR)/, $(name)))                \
+        $(eval subdirs_sep = $(subst $(comma),  ,$(LAYER_$(name)_subdirs))) \
+                                                                            \
+        $(if $(value LAYER_$(name)_subdirs),                                \
+            $(foreach subdir, $(subdirs_sep),                               \
+                $(eval LAYERS_DIR += $(addsuffix /$(subdir), $(dir)))       \
+                $(eval LAYER_$(subdir)_url := $(LAYER_$(name)_url))         \
+            )                                                               \
+        ,                                                                   \
+            $(eval LAYERS_DIR += $(dir))                                    \
+        )                                                                   \
         $(eval LAYER_$(name)_branch ?= $(YOCTO_RELEASE))                    \
  )
 
