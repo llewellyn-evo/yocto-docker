@@ -54,12 +54,17 @@ $(foreach line, $(addprefix url=, $(LAYERS)),                               \
 .PHONY: distclean help
 
 help:
+	@echo 'List targets:'
+	@echo ' list-machine    - Show available machines'
+	@echo ' list-config     - Show available configs for a given machine'
 	@echo 'Cleaning targets:'
-	@echo '	distclean	- Remove all generated files and directories'
+	@echo ' distclean	- Remove all generated files and directories'
+	@echo ' clean-bbconfigs - Remove bblayers.conf and local.conf files'
+	@echo ' clean-images    - Remove resulting target images and packages'
 	@echo ''
 	@echo 'Other generic targets:'
-	@echo '	all		- Download docker image, yocto and meta layers and build image $(IMAGE_NAME) for machine $(MACHINE)'
-	@echo '	devshell	- Invoke devepoper shell'
+	@echo ' all		- Download docker image, yocto and meta layers and build image $(IMAGE_NAME) for machine $(MACHINE)'
+	@echo ' devshell	- Invoke devepoper shell'
 	@echo ''
 	@echo 'Also docker can be run directly:'
 	@echo '$(DOCKER_RUN)'
@@ -73,11 +78,11 @@ help:
 	@echo 'Result binaryes and images you can find at $(BUILD_DIR)/tmp/deploy/'
 
 list-machine:
-	@ls -1 machine/ | grep -v common
+	@ls -1 machine/ | grep -v common | sed 's/$(MACHINE)/* &/g'
 
 list-config:
 	@echo " * $(MACHINE):"
-	@ls machine/$(MACHINE)/ | grep .mk
+	@ls -1 machine/$(MACHINE)/ | grep .mk
 
 all: build-poky-container sources layers $(BUILD_DIR) configure
 	$(DOCKER_RUN) --cmd "bitbake $(IMAGE_NAME)"
