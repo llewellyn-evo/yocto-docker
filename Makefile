@@ -40,15 +40,17 @@ $(foreach line, $(addprefix url=, $(LAYERS)),                               \
         $(eval dir := $(addprefix $(SOURCES_DIR)/, $(name)))                \
         $(eval subdirs_sep = $(subst $(comma),  ,$(LAYER_$(name)_subdirs))) \
                                                                             \
+        $(eval LAYER_$(name)_branch ?= $(YOCTO_RELEASE))                    \
+                                                                            \
         $(if $(value LAYER_$(name)_subdirs),                                \
             $(foreach subdir, $(subdirs_sep),                               \
                 $(eval LAYERS_DIR += $(addsuffix /$(subdir), $(dir)))       \
                 $(eval LAYER_$(subdir)_url := $(LAYER_$(name)_url))         \
+                $(eval LAYER_$(subdir)_branch := $(LAYER_$(name)_branch))   \
             )                                                               \
         ,                                                                   \
             $(eval LAYERS_DIR += $(dir))                                    \
         )                                                                   \
-        $(eval LAYER_$(name)_branch ?= $(YOCTO_RELEASE))                    \
  )
 
 .PHONY: distclean help
