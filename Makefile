@@ -80,11 +80,11 @@ help:
 	@echo 'Result binaryes and images you can find at $(BUILD_DIR)/tmp/deploy/'
 
 list-machine:
-	@ls -1 machine/ | grep -v common | sed 's/$(MACHINE)/* &/g'
+	@ls -1 machine/ | grep -v common | sed '/$(MACHINE)[-.]/! s/\b$(MACHINE)\b/ * &/g'
 
 list-config:
 	@echo " * $(MACHINE):"
-	@ls -1 machine/$(MACHINE)/ | grep .mk
+	@ls -1 machine/$(MACHINE)/ | grep .mk | sed 's/.mk\b//g' | sed '/$(MACHINE_CONFIG)[-.]/! s/\b$(MACHINE_CONFIG)\b/ * &/g'
 
 all: build-poky-container sources layers $(BUILD_DIR) configure
 	$(DOCKER_RUN) --cmd "bitbake $(IMAGE_NAME)"
