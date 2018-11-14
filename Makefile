@@ -3,38 +3,30 @@
 # This project helps make build system for embedded platform by using docker and yocto.
 
 MACHINE           = sama5d2-roadrunner-evomini2
-IMAGE_NAME        = core-image-minimal
-LOCAL_CONF_OPT    = 'MACHINE            = "$(MACHINE)"'    \
-                    'PACKAGE_CLASSES    = "package_ipk"'   \
-                    'TCLIBC             = "musl"'
+MACHINE_CONFIG    = default
 
+# Folders with source and build files
+SOURCES_DIR       = sources
 BUILD_DIR         = build
 
 # If layer branch not set with "branch=" option, YOCTO_RELEASE will be used.
 # If layer has no such branch, 'master' branch # will be used.
 YOCTO_RELEASE     = rocko
 
-# Layers to download and add to the configuration.
-# Layers must me in right order, layers used by other layers must become first.
-# Syntax: url[;option1=value;option2=value]
-# Possible options:
-# 	* branch=<branch-to-clone>
-# 	* subdirs=<subdirectory with meta-leyer>[,<subdirectory with meta-leyer>]
-LAYERS           += https://github.com/linux4sam/meta-atmel      \
-                    https://github.com/ramok/meta-acme           \
-                    https://github.com/evologics/meta-evo        \
-                    git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-webserver,meta-networking
-
+# Docker settings
 DOCKER_IMAGE      = crops/poky
 DOCKER_REPO       = debian-9
-
 DOCKER_RUN        = docker run -it --rm -v $$(pwd):$(DOCKER_WORK_DIR)  \
                     --name="$(MACHINE)"                                \
                     $(DOCKER_IMAGE):$(DOCKER_REPO)                     \
                     --workdir=$(DOCKER_WORK_DIR)/$(BUILD_DIR)
-
 DOCKER_WORK_DIR = /work
-SOURCES_DIR 	= sources
+
+# Include saved config
+-include .config.mk
+
+# Include machine config with a possibility to override everything above
+include machine/$(MACHINE)/$(MACHINE_CONFIG).mk
 
 comma := ,
 # Iterate over lines in LAYERS and fill necessary variables
@@ -62,12 +54,17 @@ $(foreach line, $(addprefix url=, $(LAYERS)),                               \
 .PHONY: distclean help
 
 help:
+	@echo 'List targets:'
+	@echo ' list-machine    - Show available machines'
+	@echo ' list-config     - Show available configs for a given machine'
 	@echo 'Cleaning targets:'
-	@echo '	distclean	- Remove all generated files and directories'
+	@echo ' distclean	- Remove all generated files and directories'
+	@echo ' clean-bbconfigs - Remove bblayers.conf and local.conf files'
+	@echo ' clean-images    - Remove resulting target images and packages'
 	@echo ''
 	@echo 'Other generic targets:'
-	@echo '	all		- Download docker image, yocto and meta layers and build image $(IMAGE_NAME) for machine $(MACHINE)'
-	@echo '	devshell	- Invoke devepoper shell'
+	@echo ' all		- Download docker image, yocto and meta layers and build image $(IMAGE_NAME) for machine $(MACHINE)'
+	@echo ' devshell	- Invoke devepoper shell'
 	@echo ''
 	@echo 'Also docker can be run directly:'
 	@echo '$(DOCKER_RUN)'
@@ -79,6 +76,13 @@ help:
 	@echo 'Build binaries and images for RoadRunner on BertaD2 baseboard in separate build directory'
 	@echo '$$ make MACHINE=sama5d2-roadrunner-bertad2-qspi BUILD_DIR=build-bertad2-qspi IMAGE_NAME=acme-minimal-image all'
 	@echo 'Result binaryes and images you can find at $(BUILD_DIR)/tmp/deploy/'
+
+list-machine:
+	@ls -1 machine/ | grep -v common | sed 's/$(MACHINE)/* &/g'
+
+list-config:
+	@echo " * $(MACHINE):"
+	@ls -1 machine/$(MACHINE)/ | grep .mk
 
 all: build-poky-container sources layers $(BUILD_DIR) configure
 	$(DOCKER_RUN) --cmd "bitbake $(IMAGE_NAME)"
@@ -119,6 +123,12 @@ $(BUILD_DIR)/conf/local.conf:
 		echo $$OPT;					 \
 	done >> $(BUILD_DIR)/conf/local.conf
 
+	echo "MACHINE = $(MACHINE)" > .config.mk
+	echo "MACHINE_CONFIG = $(MACHINE_CONFIG)" >> .config.mk
+
+clean-bbconfigs:
+	rm $(BUILD_DIR)/conf/local.conf $(BUILD_DIR)/conf/bblayers.conf
+
 clean-images:
 	rm -rf $(BUILD_DIR)/tmp/deploy
 
@@ -126,5 +136,5 @@ cleanall:
 	rm -rf $(BUILD_DIR)/tmp $(BUILD_DIR)/sstate-cache
 
 distclean:
-	rm -rf $(BUILD_DIR) $(SOURCES_DIR) poky-container
+	rm -rf $(BUILD_DIR) $(SOURCES_DIR) poky-container .config.mk
 
