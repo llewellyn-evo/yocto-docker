@@ -2,10 +2,11 @@
 IMAGE_NAME        = core-image-minimal
 
 # Options to append into local.conf
-LOCAL_CONF_OPT    = 'MACHINE            = "$(MACHINE)"'    \
-                    'PACKAGE_CLASSES    = "package_ipk"'   \
-                    'TCLIBC             = "glibc"'         \
-                    'CORE_IMAGE_EXTRA_INSTALL += " opkg dropbear screen tcl expect rsync socat dune canutils iproute2 ltrace file "' \
+LOCAL_CONF_OPT    = 'MACHINE            = "$(MACHINE)"'         \
+                    'PACKAGE_CLASSES    = "package_ipk"'        \
+                    'TCLIBC             = "glibc"'              \
+                    'CORE_IMAGE_EXTRA_INSTALL += " opkg dropbear screen tcl expect rsync socat dune canutils iproute2 ltrace file pciutils usbutils ethtool util-linux monit "' \
+                    'PREFERRED_VERSION_linux-karo = "4.4.y"'   \
 
 # Build dir
 BUILD_DIR         = build
@@ -24,5 +25,5 @@ LAYERS           += https://github.com/linux4sam/meta-atmel      \
                     https://github.com/ramok/meta-acme           \
                     git://git.openembedded.org/meta-openembedded;subdirs=meta-oe \
                     https://git.yoctoproject.org/git/meta-freescale \
-                    https://github.com/victor-av/meta-freescale-3rdparty;branch=karo-rocko \
+                    https://github.com/victor-av/meta-freescale-3rdparty \
                     https://github.com/victor-av/meta-evo;branch=karo-rocko
