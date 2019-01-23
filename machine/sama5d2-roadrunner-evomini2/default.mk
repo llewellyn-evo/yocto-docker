@@ -4,6 +4,7 @@ IMAGE_NAME        = core-image-minimal
 # Options to append into local.conf
 LOCAL_CONF_OPT    = 'MACHINE            = "$(MACHINE)"'    \
                     'PACKAGE_CLASSES    = "package_ipk"'   \
+                    'DISTRO             = "poky-evo"' 	   \
                     'TCLIBC             = "musl"'
 
 # Build dir
