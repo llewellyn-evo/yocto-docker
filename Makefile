@@ -40,15 +40,17 @@ $(foreach line, $(addprefix url=, $(LAYERS)),                               \
         $(eval dir := $(addprefix $(SOURCES_DIR)/, $(name)))                \
         $(eval subdirs_sep = $(subst $(comma),  ,$(LAYER_$(name)_subdirs))) \
                                                                             \
+        $(eval LAYER_$(name)_branch ?= $(YOCTO_RELEASE))                    \
+                                                                            \
         $(if $(value LAYER_$(name)_subdirs),                                \
             $(foreach subdir, $(subdirs_sep),                               \
                 $(eval LAYERS_DIR += $(addsuffix /$(subdir), $(dir)))       \
                 $(eval LAYER_$(subdir)_url := $(LAYER_$(name)_url))         \
+                $(eval LAYER_$(subdir)_branch := $(LAYER_$(name)_branch))   \
             )                                                               \
         ,                                                                   \
             $(eval LAYERS_DIR += $(dir))                                    \
         )                                                                   \
-        $(eval LAYER_$(name)_branch ?= $(YOCTO_RELEASE))                    \
  )
 
 .PHONY: distclean help
@@ -78,11 +80,11 @@ help:
 	@echo 'Result binaryes and images you can find at $(BUILD_DIR)/tmp/deploy/'
 
 list-machine:
-	@ls -1 machine/ | grep -v common | sed 's/$(MACHINE)/* &/g'
+	@ls -1 machine/ | grep -v common | sed '/$(MACHINE)[-.]/! s/\b$(MACHINE)\b/ * &/g'
 
 list-config:
 	@echo " * $(MACHINE):"
-	@ls -1 machine/$(MACHINE)/ | grep .mk
+	@ls -1 machine/$(MACHINE)/ | grep .mk | sed 's/.mk\b//g' | sed '/$(MACHINE_CONFIG)[-.]/! s/\b$(MACHINE_CONFIG)\b/ * &/g'
 
 all: build-poky-container sources layers $(BUILD_DIR) configure
 	$(DOCKER_RUN) --cmd "bitbake $(IMAGE_NAME)"
