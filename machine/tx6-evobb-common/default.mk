@@ -25,5 +25,5 @@ LAYERS           += https://github.com/linux4sam/meta-atmel      \
                     https://github.com/ramok/meta-acme           \
                     git://git.openembedded.org/meta-openembedded;subdirs=meta-oe \
                     https://git.yoctoproject.org/git/meta-freescale \
-                    https://github.com/victor-av/meta-freescale-3rdparty \
-                    https://github.com/victor-av/meta-evo;branch=karo-rocko
+                    https://github.com/evologics/meta-freescale-3rdparty \
+                    https://github.com/evologics/meta-evo
