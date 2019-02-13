@@ -10,10 +10,10 @@ machine 'sama5d2-roadrunner-evomini2'.
 
 $ make all
 
-Result binaries and images can be found in directory build-evo/tmp/deploy/
+Result binaries and images can be found in directory build/tmp/deploy/
 
-Build binaries and images another machine
-$ make MACHIME=qemux86 all
+Build binaries and images for another machine
+$ make MACHINE=qemux86 all
 
 Build binaries and images for RoadRunner on BertaD2 baseboard in separate build directory
 $ make MACHINE=sama5d2-roadrunner-bertad2-qspi BUILD_DIR=build-bertad2-qspi IMAGE_NAME=acme-minimal-image all
@@ -32,6 +32,17 @@ For every run 'make' will load contents of machine/$(MACHINE)/$(MACHINE_CONFIG).
 'make list-machine' displays the contents of 'machine' folder except *common* files.
 'make list-config' shows the current machine and available .mk files for it.
 
+=== Binding home directory ===
+One can create a 'home' folder which will be passed to the container as a user home folder
+in order to:
+ a. pass shell parameters with .bashrc and save history throughout the sessions,
+ b. pass ssh configuration and keys to access private repositories,
+ and so on.
+
+To activate this binding, create a file named '.use_home' in the 'home' folder and
+just delete if the binding is not needed anymore.
+Contents of the 'home' folder are intentionally excluded from git to prevent accidentally pushing
+sensitive information to git.
 
 === Usefull commands ===
 Show help with usefull targets and tips
