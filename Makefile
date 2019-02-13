@@ -1,5 +1,5 @@
 # Docker/Yocto Build System Setup
-#     by komar@evologics.de 2018 Evologics GmbH
+#     by komar@evologics.de 2018-2019 Evologics GmbH
 # This project helps make build system for embedded platform by using docker and yocto.
 
 MACHINE           = sama5d2-roadrunner-evomini2
@@ -10,17 +10,25 @@ SOURCES_DIR       = sources
 BUILD_DIR         = build
 
 # If layer branch not set with "branch=" option, YOCTO_RELEASE will be used.
-# If layer has no such branch, 'master' branch # will be used.
+# If layer has no such branch, 'master' branch will be used.
 YOCTO_RELEASE     = rocko
 
 # Docker settings
 DOCKER_IMAGE      = crops/poky
 DOCKER_REPO       = debian-9
-DOCKER_RUN        = docker run -it --rm -v $$(pwd):$(DOCKER_WORK_DIR)  \
+DOCKER_WORK_DIR   = /work
+DOCKER_BIND       = -v $$(pwd):$(DOCKER_WORK_DIR)
+
+# If the file "home/.use_home" exists, bind "home" folder to the container.
+ifneq (,$(wildcard home/.use_home))
+        DOCKER_BIND += -v $$(pwd)/home/:/home/pokyuser/
+endif
+
+# Cmdline to run docker.
+DOCKER_RUN        = docker run -it --rm $(DOCKER_BIND)                 \
                     --name="$(MACHINE)"                                \
                     $(DOCKER_IMAGE):$(DOCKER_REPO)                     \
                     --workdir=$(DOCKER_WORK_DIR)/$(BUILD_DIR)
-DOCKER_WORK_DIR = /work
 
 # Include saved config
 -include .config.mk
