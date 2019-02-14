@@ -1,5 +1,5 @@
 # Docker/Yocto Build System Setup
-#     by komar@evologics.de 2018 Evologics GmbH
+#     by komar@evologics.de 2018-2019 Evologics GmbH
 # This project helps make build system for embedded platform by using docker and yocto.
 
 MACHINE           = sama5d2-roadrunner-evomini2
@@ -10,17 +10,25 @@ SOURCES_DIR       = sources
 BUILD_DIR         = build
 
 # If layer branch not set with "branch=" option, YOCTO_RELEASE will be used.
-# If layer has no such branch, 'master' branch # will be used.
+# If layer has no such branch, 'master' branch will be used.
 YOCTO_RELEASE     = rocko
 
 # Docker settings
 DOCKER_IMAGE      = crops/poky
 DOCKER_REPO       = debian-9
-DOCKER_RUN        = docker run -it --rm -v $$(pwd):$(DOCKER_WORK_DIR)  \
+DOCKER_WORK_DIR   = /work
+DOCKER_BIND       = -v $$(pwd):$(DOCKER_WORK_DIR)
+
+# If the file "home/.use_home" exists, bind "home" folder to the container.
+ifneq (,$(wildcard home/.use_home))
+        DOCKER_BIND += -v $$(pwd)/home/:/home/pokyuser/
+endif
+
+# Cmdline to run docker.
+DOCKER_RUN        = docker run -it --rm $(DOCKER_BIND)                 \
                     --name="$(MACHINE)"                                \
                     $(DOCKER_IMAGE):$(DOCKER_REPO)                     \
                     --workdir=$(DOCKER_WORK_DIR)/$(BUILD_DIR)
-DOCKER_WORK_DIR = /work
 
 # Include saved config
 -include .config.mk
@@ -40,15 +48,17 @@ $(foreach line, $(addprefix url=, $(LAYERS)),                               \
         $(eval dir := $(addprefix $(SOURCES_DIR)/, $(name)))                \
         $(eval subdirs_sep = $(subst $(comma),  ,$(LAYER_$(name)_subdirs))) \
                                                                             \
+        $(eval LAYER_$(name)_branch ?= $(YOCTO_RELEASE))                    \
+                                                                            \
         $(if $(value LAYER_$(name)_subdirs),                                \
             $(foreach subdir, $(subdirs_sep),                               \
                 $(eval LAYERS_DIR += $(addsuffix /$(subdir), $(dir)))       \
                 $(eval LAYER_$(subdir)_url := $(LAYER_$(name)_url))         \
+                $(eval LAYER_$(subdir)_branch := $(LAYER_$(name)_branch))   \
             )                                                               \
         ,                                                                   \
             $(eval LAYERS_DIR += $(dir))                                    \
         )                                                                   \
-        $(eval LAYER_$(name)_branch ?= $(YOCTO_RELEASE))                    \
  )
 
 .PHONY: distclean help
@@ -78,11 +88,11 @@ help:
 	@echo 'Result binaryes and images you can find at $(BUILD_DIR)/tmp/deploy/'
 
 list-machine:
-	@ls -1 machine/ | grep -v common | sed 's/$(MACHINE)/* &/g'
+	@ls -1 machine/ | grep -v common | sed '/$(MACHINE)[-.]/! s/\b$(MACHINE)\b/ * &/g'
 
 list-config:
 	@echo " * $(MACHINE):"
-	@ls -1 machine/$(MACHINE)/ | grep .mk
+	@ls -1 machine/$(MACHINE)/ | grep .mk | sed 's/.mk\b//g' | sed '/$(MACHINE_CONFIG)[-.]/! s/\b$(MACHINE_CONFIG)\b/ * &/g'
 
 all: build-poky-container sources layers $(BUILD_DIR) configure
 	$(DOCKER_RUN) --cmd "bitbake $(IMAGE_NAME)"
