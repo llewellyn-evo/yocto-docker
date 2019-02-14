@@ -27,4 +27,4 @@ LAYERS           += https://github.com/linux4sam/meta-atmel      \
                     https://github.com/sbabic/meta-swupdate \
                     git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-webserver,meta-python,meta-networking
 
-MACHINE_BITBAKE_TARGETS = swupdate-images-evo
+MACHINE_BITBAKE_TARGETS = meta-toolchain swupdate-images-evo

@@ -95,7 +95,7 @@ list-config:
 	@ls -1 machine/$(MACHINE)/ | grep .mk | sed 's/.mk\b//g' | sed '/$(MACHINE_CONFIG)[-.]/! s/\b$(MACHINE_CONFIG)\b/ * &/g'
 
 all: build-poky-container sources layers $(BUILD_DIR) configure
-	$(DOCKER_RUN) --cmd "bitbake $(IMAGE_NAME) meta-toolchain $(MACHINE_BITBAKE_TARGETS)"
+	$(DOCKER_RUN) --cmd "bitbake $(IMAGE_NAME) $(MACHINE_BITBAKE_TARGETS)"
 	@echo 'Result binaryes and images you can find at $(BUILD_DIR)/tmp/deploy/'
 
 devshell: build-poky-container sources layers $(BUILD_DIR) configure
