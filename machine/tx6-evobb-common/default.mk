@@ -13,7 +13,7 @@ BUILD_DIR         = build
 
 # If layer branch not set with "branch=" option, YOCTO_RELEASE will be used.
 # If layer has no such branch, 'master' branch will be used.
-YOCTO_RELEASE     = rocko
+YOCTO_RELEASE     = thud
 
 # Layers to download and add to the configuration.
 # Layers must me in right order, layers used by other layers must become first.
