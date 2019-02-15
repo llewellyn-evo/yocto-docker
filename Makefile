@@ -41,6 +41,7 @@ comma := ,
 $(foreach line, $(addprefix url=, $(LAYERS)),                               \
         $(eval line_sep = $(subst ;,  ,$(line)))                            \
         $(eval name := $(lastword $(subst /,  ,$(firstword $(line_sep)))))  \
+	$(eval name := $(name:%.git=%))                                     \
         $(foreach property, $(line_sep),                                    \
             $(eval LAYER_$(name)_$(property))                               \
         )                                                                   \
