@@ -104,7 +104,7 @@ devshell: build-poky-container sources layers $(BUILD_DIR) configure
 build-poky-container: poky-container/build-and-test.sh
 
 poky-container/build-and-test.sh:
-	git clone -b $(YOCTO_RELEASE) https://github.com/evologics/poky-container
+	git clone -b rocko https://github.com/evologics/poky-container
 	cd poky-container && \
 		BASE_DISTRO=$(DOCKER_REPO) REPO=$(DOCKER_IMAGE) ./build-and-test.sh
 
