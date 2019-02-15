@@ -136,6 +136,20 @@ $(BUILD_DIR)/conf/local.conf:
 	echo "MACHINE = $(MACHINE)" > .config.mk
 	echo "MACHINE_CONFIG = $(MACHINE_CONFIG)" >> .config.mk
 
+add-layer: configure layers
+	for LAYER in $(LAYERS_DIR); do \
+	$(DOCKER_RUN) --cmd "bitbake-layers add-layer $(DOCKER_WORK_DIR)/$$LAYER"; \
+	done
+
+remove-layer: configure
+	@echo "REMOVING: $(LAYERS_DIR)"
+	@echo -n "Press Ctrl-C to cancel"
+	@for i in $$(seq 1 5); do echo -n "." && sleep 1; done
+	@echo
+	for LAYER in $(LAYERS_DIR); do \
+	$(DOCKER_RUN) --cmd "bitbake-layers remove-layer $(DOCKER_WORK_DIR)/$$LAYER && rm -rf $(DOCKER_WORK_DIR)/$$LAYER"; \
+	done
+
 clean-bbconfigs:
 	rm $(BUILD_DIR)/conf/local.conf $(BUILD_DIR)/conf/bblayers.conf
 
