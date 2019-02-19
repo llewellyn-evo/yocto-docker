@@ -73,6 +73,11 @@ help:
 	@echo ' clean-bbconfigs - Remove bblayers.conf and local.conf files'
 	@echo ' clean-images    - Remove resulting target images and packages'
 	@echo ''
+	@echo 'Add/remove layers:'
+	@echo ' add-layer       - Add one or multiple layers'
+	@echo ' remove-layer    - Remove one or multiple layers'
+	@echo '  necessary parameter: LAYERS="<layer1> <layer2>"'
+	@echo ''
 	@echo 'Other generic targets:'
 	@echo ' all		- Download docker image, yocto and meta layers and build image $(IMAGE_NAME) for machine $(MACHINE)'
 	@echo ' devshell	- Invoke devepoper shell'
@@ -86,7 +91,7 @@ help:
 	@echo 'TIPS:'
 	@echo 'Build binaries and images for RoadRunner on BertaD2 baseboard in separate build directory'
 	@echo '$$ make MACHINE=sama5d2-roadrunner-bertad2-qspi BUILD_DIR=build-bertad2-qspi IMAGE_NAME=acme-minimal-image all'
-	@echo 'Result binaryes and images you can find at $(BUILD_DIR)/tmp/deploy/'
+	@echo 'Result binaries and images you can find at $(BUILD_DIR)/tmp/deploy/'
 
 list-machine:
 	@ls -1 machine/ | grep -v common | sed '/$(MACHINE)[-.]/! s/\b$(MACHINE)\b/ * &/g'
@@ -97,7 +102,7 @@ list-config:
 
 all: build-poky-container sources layers $(BUILD_DIR) configure
 	$(DOCKER_RUN) --cmd "bitbake $(IMAGE_NAME) $(MACHINE_BITBAKE_TARGETS)"
-	@echo 'Result binaryes and images you can find at $(BUILD_DIR)/tmp/deploy/'
+	@echo 'Result binaries and images you can find at $(BUILD_DIR)/tmp/deploy/'
 
 devshell: build-poky-container sources layers $(BUILD_DIR) configure
 	$(DOCKER_RUN)
