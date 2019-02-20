@@ -168,3 +168,20 @@ cleanall:
 distclean:
 	rm -rf $(BUILD_DIR) $(SOURCES_DIR) poky-container .config.mk
 
+package-index:
+	$(DOCKER_RUN) --cmd "bitbake package-index"
+
+ipk-server: package-index
+	$(eval IP := $(firstword $(shell ip a | grep dynamic | grep -Po 'inet \K[\d.]+')))
+	$(eval PORT := 8080)
+	@echo 'Assuming address $(IP):$(PORT)'
+	@echo ''
+	@echo 'Add following lines to /etc/opkg/opkg.conf'
+	@echo ''
+	$(eval ipk-archs := $(wildcard $(BUILD_DIR)/tmp/deploy/ipk/*))
+	@$(foreach arch, $(ipk-archs), \
+	 $(eval arch_strip := $(lastword $(subst /,  ,$(arch))))                 \
+	 echo 'src/gz $(arch_strip) http://$(IP):$(PORT)/$(arch_strip)'; \
+	 )
+	@echo ''
+	@cd $(BUILD_DIR)/tmp/deploy/ipk/ && python -m SimpleHTTPServer $(PORT)
