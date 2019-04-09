@@ -2,12 +2,11 @@
 #     by komar@evologics.de 2018-2019 Evologics GmbH
 # This project helps make build system for embedded platform by using docker and yocto.
 
-MACHINE           = sama5d2-roadrunner-evomini2
 MACHINE_CONFIG    = default
 
 # Folders with source and build files
 SOURCES_DIR       = sources
-BUILD_DIR         = build
+BUILD_DIR        ?= build-$(MACHINE)
 
 # If layer branch not set with "branch=" option, YOCTO_RELEASE will be used.
 # If layer has no such branch, 'master' branch will be used.
@@ -32,6 +31,10 @@ DOCKER_RUN        = docker run -it --rm $(DOCKER_BIND)                 \
 
 # Include saved config
 -include .config.mk
+
+ifeq ($(MACHINE),)
+$(error Variable MACHINE must be set: $(notdir $(wildcard machine/*)))
+endif
 
 # Include machine config with a possibility to override everything above
 include machine/$(MACHINE)/$(MACHINE_CONFIG).mk
