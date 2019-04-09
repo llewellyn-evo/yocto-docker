@@ -133,17 +133,15 @@ $(BUILD_DIR):
 
 configure: $(BUILD_DIR)/conf/local.conf
 
-$(BUILD_DIR)/conf/local.conf:
-	$(DOCKER_RUN) --cmd "cd $(DOCKER_WORK_DIR)/$(SOURCES_DIR) && source oe-init-build-env $(DOCKER_WORK_DIR)/$(BUILD_DIR)" 
-	for LAYER in $(LAYERS_DIR); do \
-		$(DOCKER_RUN) --cmd "bitbake-layers add-layer $(DOCKER_WORK_DIR)/$$LAYER"; \
-	done
-	for OPT in $(LOCAL_CONF_OPT); do \
-		echo $$OPT;					 \
-	done >> $(BUILD_DIR)/conf/local.conf
+$(BUILD_DIR)/conf/local.conf: .config.mk
+	@echo Creating new build directory: $(BUILD_DIR)
+	@$(DOCKER_RUN) --cmd "cd $(DOCKER_WORK_DIR)/$(SOURCES_DIR) && source oe-init-build-env $(DOCKER_WORK_DIR)/$(BUILD_DIR)" > /dev/null
+	@$(DOCKER_RUN) --cmd "bitbake-layers add-layer $(addprefix $(DOCKER_WORK_DIR)/,$(LAYERS_DIR))" > /dev/null
+	@printf "%s\n" $(LOCAL_CONF_OPT) >> $(BUILD_DIR)/conf/local.conf
 
-	echo "MACHINE = $(MACHINE)" > .config.mk
-	echo "MACHINE_CONFIG = $(MACHINE_CONFIG)" >> .config.mk
+	@echo Creating config .config.mk
+	@echo "MACHINE ?= $(MACHINE)" > .config.mk
+	@echo "MACHINE_CONFIG ?= $(MACHINE_CONFIG)" >> .config.mk
 
 add-layer: configure layers
 	for LAYER in $(LAYERS_DIR); do \
