@@ -33,7 +33,9 @@ DOCKER_RUN        = docker run -it --rm $(DOCKER_BIND)                 \
 -include .config.mk
 
 ifeq ($(MACHINE),)
-$(error Variable MACHINE must be set: $(notdir $(wildcard machine/*)))
+  $(info Available machines are:)
+  $(foreach m_name, $(filter-out %common, $(notdir $(wildcard machine/*))), $(info $(m_name)))
+  $(error Variable MACHINE must be set!)
 endif
 
 # Include machine config with a possibility to override everything above
@@ -139,6 +141,7 @@ $(BUILD_DIR)/conf/local.conf: .config.mk
 	@$(DOCKER_RUN) --cmd "bitbake-layers add-layer $(addprefix $(DOCKER_WORK_DIR)/,$(LAYERS_DIR))" > /dev/null
 	@printf "%s\n" $(LOCAL_CONF_OPT) >> $(BUILD_DIR)/conf/local.conf
 
+.config.mk:
 	@echo Creating config .config.mk
 	@echo "MACHINE ?= $(MACHINE)" > .config.mk
 	@echo "MACHINE_CONFIG ?= $(MACHINE_CONFIG)" >> .config.mk
