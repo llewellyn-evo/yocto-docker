@@ -105,7 +105,7 @@ help:
 	@echo ' image-check     - Checking exising docker image, and if not - build it'
 	@echo ''
 	@echo 'Generic targets:'
-	@echo ' all       - Download docker image, yocto and meta layers and build image $(DOCKER_IMAGE) for machine $(MACHINE)'
+	@echo ' all       - Download docker image, yocto and meta layers and build image $(IMAGE_NAME) for machine $(MACHINE)'
 	@echo ' devshell  - Invoke developer shell. Can run command in CMD variable'
 	@echo ''
 	@echo 'Also docker can be run directly:'
@@ -116,7 +116,7 @@ help:
 	@echo ''
 	@echo '=== Usefull tips ===='
 	@echo 'Build binaries and images for RoadRunner on BertaD2 baseboard in separate build directory'
-	@echo '$$ make MACHINE=sama5d2-roadrunner-bertad2-qspi BUILD_DIR=build-bertad2-qspi DOCKER_IMAGE=acme-minimal-image all'
+	@echo '$$ make MACHINE=sama5d2-roadrunner-bertad2-qspi BUILD_DIR=build-bertad2-qspi IMAGE_NAME=acme-minimal-image all'
 	@echo 'Result binaryes and images you can find at $(BUILD_DIR)/tmp/deploy/'
 	@echo ''
 	@echo 'Rebuild kernel'
@@ -143,7 +143,7 @@ list-config:
 	@ls -1 machine/$(MACHINE)/ | grep .mk | sed 's/.mk\b//g' | sed '/$(MACHINE_CONFIG)[-.]/! s/\b$(MACHINE_CONFIG)\b/ * &/g'
 
 all: image-check $(SOURCES_DIR) layers $(BUILD_DIR) configure
-	@$(DOCKER_RUN) "bitbake $(DOCKER_IMAGE) $(MACHINE_BITBAKE_TARGETS)"
+	@$(DOCKER_RUN) "bitbake $(IMAGE_NAME) $(MACHINE_BITBAKE_TARGETS)"
 	@echo 'Result binaries and images you can find at $(BUILD_DIR)/tmp/deploy/'
 
 devshell: image-check $(SOURCES_DIR) layers $(BUILD_DIR) configure
