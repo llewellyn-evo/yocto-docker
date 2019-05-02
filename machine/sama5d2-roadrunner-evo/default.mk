@@ -5,10 +5,8 @@ IMAGE_NAME        = evologics-base-image
 LOCAL_CONF_OPT    = 'MACHINE            = "$(MACHINE)"'    \
                     'PACKAGE_CLASSES    = "package_ipk"'   \
                     'DISTRO             = "poky-evo"' 	   \
-                    'TCLIBC             = "musl"'
-
-# Build dir
-BUILD_DIR         = build
+                    'TCLIBC             = "musl"'          \
+                    'BBMASK            += ".*karo.*"'
 
 # If layer branch not set with "branch=" option, YOCTO_RELEASE will be used.
 # If layer has no such branch, 'master' branch will be used.
@@ -25,6 +23,6 @@ LAYERS           += https://github.com/linux4sam/meta-atmel      \
                     https://github.com/evologics/meta-evo        \
                     https://github.com/joaohf/meta-erlang;branch=master \
                     git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-webserver,meta-python,meta-networking \
-                    https://github.com/sbabic/meta-swupdate \
+                    https://github.com/sbabic/meta-swupdate
 
 MACHINE_BITBAKE_TARGETS = meta-toolchain swupdate-images-evo

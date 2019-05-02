@@ -6,7 +6,7 @@ with distro poky (https://www.yoctoproject.org/tools-resources/projects/poky)
 === Quick Start ===
 This will setup docker image 'crops/poky', download yocto and meta layers,
 setup local config and run building image 'core-image-minimal' and sdk for
-machine 'sama5d2-roadrunner-evomini2'.
+machine 'sama5d2-roadrunner-evo'.
 
 $ make all
 
