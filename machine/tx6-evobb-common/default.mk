@@ -26,6 +26,7 @@ LAYERS           += https://github.com/linux4sam/meta-atmel      \
                     git://git.openembedded.org/meta-openembedded;subdirs=meta-oe \
                     https://git.yoctoproject.org/git/meta-freescale \
                     https://github.com/evologics/meta-freescale-3rdparty \
+                    https://github.com/sbabic/meta-swupdate \
                     https://github.com/evologics/meta-evo
 
 MACHINE_BITBAKE_TARGETS = u-boot
