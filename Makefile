@@ -26,7 +26,6 @@ DOCKER_BIND       = -v $$(pwd):$(DOCKER_WORK_DIR) \
 
 # Cmdline to run docker.
 DOCKER_RUN        = docker run -it --rm $(DOCKER_BIND)        \
-                    --name="$(MACHINE)"                       \
                     --workdir=$(DOCKER_WORK_DIR)/$(BUILD_DIR) \
                     $(DOCKER_IMAGE)
 
