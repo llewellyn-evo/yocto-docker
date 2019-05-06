@@ -40,7 +40,7 @@ else
         -v $(HOME)/.tmux.conf:/home/$(USER)/.tmux.conf
 endif
 
-DOCKER_HOST_NAME=$(subst :,-,$(subst /,-,$(DOCKER_IMAGE)))
+DOCKER_HOST_NAME=build-$(subst :,-,$(subst /,-,$(MACHINE)))
 
 # Include saved config
 -include .config.mk
