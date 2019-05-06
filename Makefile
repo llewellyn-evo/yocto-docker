@@ -126,7 +126,7 @@ help:
 	@echo ''
 	@echo 'Build binaries, images, SDK and updater for RoadRunner on EvoTiny by bitbake in interactive docker shell'
 	@echo '$$ make MACHINE=sama5d2-roadrunner-evo devshell'
-	@echo 'docker$$ bitbake virtual/kernel evologics-base-image swupdate-images-evo meta-tiilchain packagegroup-erlang-embedded'
+	@echo 'docker$$ bitbake virtual/kernel evologics-base-image swupdate-images-evo meta-toolchain packagegroup-erlang-embedded'
 	@echo 'docker$$ bitbake evologics-base-image -c do_populate_sdk'
 	@echo 'docker$$ bitbake evologics-base-image -c do_populate_sdk_ext'
 	@echo ''
