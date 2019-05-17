@@ -5,7 +5,14 @@ IMAGE_NAME        = core-image-minimal
 LOCAL_CONF_OPT    = 'MACHINE            = "$(MACHINE)"'         \
                     'PACKAGE_CLASSES    = "package_ipk"'        \
                     'TCLIBC             = "glibc"'              \
-                    'CORE_IMAGE_EXTRA_INSTALL += " opkg dropbear screen tcl expect rsync socat dune canutils iproute2 ltrace file pciutils usbutils ethtool util-linux monit "' \
+                    'CORE_IMAGE_EXTRA_INSTALL += " opkg dropbear \
+						screen tcl expect rsync socat dune canutils \
+						iproute2 strace ltrace file pciutils usbutils \
+						openssh-client rsync procps keychain \
+						ethtool util-linux monit \
+						kernel-devicetree \
+						chrony gpsd-tiny \
+						pps-tools kernel-module-pps-gpio"' \
                     'PREFERRED_VERSION_linux-karo = "4.4.y"'   \
 
 # Build dir
@@ -23,7 +30,7 @@ YOCTO_RELEASE     = thud
 # 	* subdirs=<subdirectory with meta-layer>[,<subdirectory with meta-layer>]
 LAYERS           += https://github.com/linux4sam/meta-atmel      \
                     https://github.com/ramok/meta-acme           \
-                    git://git.openembedded.org/meta-openembedded;subdirs=meta-oe \
+                    git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-python,meta-networking \
                     https://git.yoctoproject.org/git/meta-freescale \
                     https://github.com/evologics/meta-freescale-3rdparty \
                     https://github.com/sbabic/meta-swupdate \
