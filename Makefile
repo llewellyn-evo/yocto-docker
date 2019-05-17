@@ -44,6 +44,8 @@ DOCKER_HOST_NAME=build-$(subst :,-,$(subst /,-,$(MACHINE)))
 # Include saved config
 -include .config.mk
 
+# Targets started with 'list-*' and 'image-*' do not need MACHINE setted
+ifneq ($(filter-out list-% image-%,$(MAKECMDGOALS)),)
 ifeq ($(MACHINE),)
   $(info Available machines are:)
   $(foreach m_name, $(filter-out %common, $(notdir $(wildcard machine/*))), $(info $(m_name)))
@@ -52,6 +54,7 @@ endif
 
 # Include machine config with a possibility to override everything above
 include machine/$(MACHINE)/$(MACHINE_CONFIG).mk
+endif
 
 comma := ,
 # Iterate over lines in LAYERS and fill necessary variables
