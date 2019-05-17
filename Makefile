@@ -44,16 +44,16 @@ DOCKER_HOST_NAME=build-$(subst :,-,$(subst /,-,$(MACHINE)))
 # Include saved config
 -include .config.mk
 
-# Targets started with 'list-*' and 'image-*' do not need MACHINE setted
-ifneq ($(filter-out list-% image-%,$(MAKECMDGOALS)),)
-ifeq ($(MACHINE),)
-  $(info Available machines are:)
-  $(foreach m_name, $(filter-out %common, $(notdir $(wildcard machine/*))), $(info $(m_name)))
-  $(error Variable MACHINE must be set!)
-endif
+# Help and targets starting with 'list-*' and 'image-*' do not need MACHINE set
+ifneq ($(filter-out help list-% image-%,$(MAKECMDGOALS)),)
+  ifeq ($(MACHINE),)
+    $(info Available machines are:)
+    $(foreach m_name, $(filter-out %common, $(notdir $(wildcard machine/*))), $(info $(m_name)))
+    $(error Variable MACHINE must be set!)
+  endif
 
-# Include machine config with a possibility to override everything above
-include machine/$(MACHINE)/$(MACHINE_CONFIG).mk
+  # Include machine config with a possibility to override everything above
+  include machine/$(MACHINE)/$(MACHINE_CONFIG).mk
 endif
 
 comma := ,
@@ -165,10 +165,11 @@ $(BUILD_DIR):
 
 configure: $(BUILD_DIR)/conf/local.conf
 
+# Build directory is created by oe-init-build-env script,
+# which is called every run from container entrypoint script
 $(BUILD_DIR)/conf/local.conf:
 	@echo Creating new build directory: $(BUILD_DIR)
-	@$(DOCKER_RUN) "cd $(DOCKER_WORK_DIR)/$(SOURCES_DIR) && source oe-init-build-env $(DOCKER_WORK_DIR)/$(BUILD_DIR)" > /dev/null
-	@$(DOCKER_RUN) "bitbake-layers add-layer $(addprefix $(DOCKER_WORK_DIR)/,$(LAYERS_DIR))" > /dev/null
+	@$(DOCKER_RUN) "bitbake-layers add-layer $(addprefix $(DOCKER_WORK_DIR)/,$(LAYERS_DIR))"
 	@printf "%s\n" $(LOCAL_CONF_OPT) >> $(BUILD_DIR)/conf/local.conf
 
 	@echo Creating config .config.mk
@@ -191,7 +192,7 @@ remove-layer: configure
 	done
 
 clean-bbconfigs:
-	rm $(BUILD_DIR)/conf/local.conf $(BUILD_DIR)/conf/bblayers.conf
+	rm -f $(BUILD_DIR)/conf/local.conf $(BUILD_DIR)/conf/bblayers.conf
 
 clean-deploy:
 	rm -rf $(BUILD_DIR)/tmp/deploy
