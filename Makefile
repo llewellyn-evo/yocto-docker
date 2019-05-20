@@ -44,16 +44,20 @@ DOCKER_HOST_NAME=build-$(subst :,-,$(subst /,-,$(MACHINE)))
 # Include saved config
 -include .config.mk
 
-# Help and targets starting with 'list-*' and 'image-*' do not need MACHINE set
-ifneq ($(filter-out help list-% image-%,$(MAKECMDGOALS)),)
-  ifeq ($(MACHINE),)
-    $(info Available machines are:)
-    $(foreach m_name, $(filter-out %common, $(notdir $(wildcard machine/*))), $(info $(m_name)))
-    $(error Variable MACHINE must be set!)
-  endif
+# Do not attempt to include something if running for bash completion
+# __BASH_MAKE_COMPLETION__will be set to 1 starting from bash-completion v2.2
+ifneq ($(__BASH_MAKE_COMPLETION__),1)
+  # Help and targets starting with 'list-*' and 'image-*' do not need MACHINE set
+  ifneq ($(filter-out help list-% image-%,$(MAKECMDGOALS)),)
+    ifeq ($(MACHINE),)
+      $(info Available machines are:)
+      $(foreach m_name, $(filter-out %common, $(notdir $(wildcard machine/*))), $(info $(m_name)))
+      $(error Variable MACHINE must be set!)
+    endif
 
-  # Include machine config with a possibility to override everything above
-  include machine/$(MACHINE)/$(MACHINE_CONFIG).mk
+    # Include machine config with a possibility to override everything above
+    include machine/$(MACHINE)/$(MACHINE_CONFIG).mk
+  endif
 endif
 
 comma := ,
