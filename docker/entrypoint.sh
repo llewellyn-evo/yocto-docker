@@ -30,9 +30,9 @@ export HOME=/home/$USER
 export WORKDIR="$(pwd)"
 
 if [ -f ../sources/oe-init-build-env ]; then
-    # If conf directory not exist (first run), create it using oe-init-build-env,
+    # If local.conf does not exist (first run), create it using oe-init-build-env,
     # running as non-privileged user
-    if [ ! -d "$WORKDIR/conf/" ]; then
+    if [ ! -f "$WORKDIR/conf/local.conf" ]; then
         su -ms /bin/bash "${USER}" -c "cd ../sources; source oe-init-build-env "$WORKDIR" > /dev/null"
     fi
 
