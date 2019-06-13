@@ -1,19 +1,26 @@
 # Image name to build by default
 IMAGE_NAME        = core-image-minimal
 
+PACKAGE_CLASSES             = package_ipk
+TCLIBC                      = glibc
+CORE_IMAGE_EXTRA_INSTALL    = opkg dropbear \
+                              screen tcl expect rsync socat dune \
+                              can-utils i2c-tools daemonize \
+                              iproute2 ltrace file pciutils usbutils \
+                              rsync procps \
+                              ethtool util-linux monit \
+			      kernel-devicetree
+#CORE_IMAGE_EXTRA_INSTALL  += strace openssh-client keychain
+#CORE_IMAGE_EXTRA_INSTALL  += chrony gpsd-tiny pps-tools kernel-module-pps-gpio
+
+PREFERRED_VERSION_linux-karo = 4.4.y
+
 # Options to append into local.conf
-LOCAL_CONF_OPT    = 'MACHINE            = "$(MACHINE)"'         \
-                    'PACKAGE_CLASSES    = "package_ipk"'        \
-                    'TCLIBC             = "glibc"'              \
-                    'CORE_IMAGE_EXTRA_INSTALL += " opkg dropbear \
-						screen tcl expect rsync socat dune canutils \
-						iproute2 strace ltrace file pciutils usbutils \
-						openssh-client rsync procps keychain \
-						ethtool util-linux monit \
-						kernel-devicetree \
-						chrony gpsd-tiny \
-						pps-tools kernel-module-pps-gpio"' \
-                    'PREFERRED_VERSION_linux-karo = "4.4.y"'   \
+LOCAL_CONF_OPT    = 'MACHINE            = "$(MACHINE)"'                                  \
+                    'PACKAGE_CLASSES    = "$(PACKAGE_CLASSES)"'                          \
+                    'TCLIBC             = "$(TCLIBC)"'                                   \
+                    'CORE_IMAGE_EXTRA_INSTALL    += "$(CORE_IMAGE_EXTRA_INSTALL)"'       \
+                    'PREFERRED_VERSION_linux-karo = "$(PREFERRED_VERSION_linux-karo)"'   \
 
 # Build dir
 BUILD_DIR         = build
