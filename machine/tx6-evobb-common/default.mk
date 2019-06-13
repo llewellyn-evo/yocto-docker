@@ -1,6 +1,16 @@
 # Image name to build by default
 IMAGE_NAME        = core-image-minimal
 
+# MACHINE is a must in local.conf
+LOCAL_CONF_OPT    = 'MACHINE = "$(MACHINE)"'
+
+# Start recording variables which will go to the local.conf file
+# If you want do redefine the variable VAR previously set, first use:
+#undefine VAR
+# Otherwise it will not be recorded and will not show up in local.conf
+OLDVARS := $(sort $(.VARIABLES))
+
+# Define what we need
 PACKAGE_CLASSES             = package_ipk
 TCLIBC                      = glibc
 CORE_IMAGE_EXTRA_INSTALL    = opkg dropbear \
@@ -15,12 +25,16 @@ CORE_IMAGE_EXTRA_INSTALL    = opkg dropbear \
 
 PREFERRED_VERSION_linux-karo = 4.4.y
 
+# Actually add recorded variables to LOCAL_CONF_OPT
+NEWVARS := $(sort $(.VARIABLES))
+$(call add_to_local_conf_opt)
+
 # Options to append into local.conf
-LOCAL_CONF_OPT    = 'MACHINE            = "$(MACHINE)"'                                  \
-                    'PACKAGE_CLASSES    = "$(PACKAGE_CLASSES)"'                          \
-                    'TCLIBC             = "$(TCLIBC)"'                                   \
-                    'CORE_IMAGE_EXTRA_INSTALL    += "$(CORE_IMAGE_EXTRA_INSTALL)"'       \
-                    'PREFERRED_VERSION_linux-karo = "$(PREFERRED_VERSION_linux-karo)"'   \
+#LOCAL_CONF_OPT    = 'MACHINE            = "$(MACHINE)"'                                  \
+#                    'PACKAGE_CLASSES    = "$(PACKAGE_CLASSES)"'                          \
+#                    'TCLIBC             = "$(TCLIBC)"'                                   \
+#                    'CORE_IMAGE_EXTRA_INSTALL    += "$(CORE_IMAGE_EXTRA_INSTALL)"'       \
+#                    'PREFERRED_VERSION_linux-karo = "$(PREFERRED_VERSION_linux-karo)"'   \
 
 # Build dir
 BUILD_DIR         = build

@@ -44,6 +44,13 @@ DOCKER_HOST_NAME=build-$(subst :,-,$(subst /,-,$(MACHINE)))
 # Include saved config
 -include .config.mk
 
+define add_to_local_conf_opt
+  $(foreach V, $(NEWVARS), \
+    $(if $(filter-out OLDVARS $(OLDVARS), $V), \
+      $(eval LOCAL_CONF_OPT += '$V = "$($V)"')) \
+   )
+endef
+
 # Do not attempt to include something if running for bash completion
 # __BASH_MAKE_COMPLETION__will be set to 1 starting from bash-completion v2.2
 ifneq ($(__BASH_MAKE_COMPLETION__),1)
