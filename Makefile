@@ -49,14 +49,28 @@ DOCKER_HOST_NAME=build-$(subst :,-,$(subst /,-,$(MACHINE)))
 # Include saved config
 -include .config.mk
 
-ifeq ($(MACHINE),)
-  $(info Available machines are:)
-  $(foreach m_name, $(filter-out %common, $(notdir $(wildcard machine/*))), $(info $(m_name)))
-  $(error Variable MACHINE must be set!)
-endif
+define add_to_local_conf_opt
+  $(foreach V, $(NEWVARS), \
+    $(if $(filter-out OLDVARS $(OLDVARS), $V), \
+      $(eval LOCAL_CONF_OPT += '$V = "$($V)"')) \
+   )
+endef
 
-# Include machine config with a possibility to override everything above
-include machine/$(MACHINE)/$(MACHINE_CONFIG).mk
+# Do not attempt to include something if running for bash completion
+# __BASH_MAKE_COMPLETION__will be set to 1 starting from bash-completion v2.2
+ifneq ($(__BASH_MAKE_COMPLETION__),1)
+  # Help and targets starting with 'list-*' and 'image-*' do not need MACHINE set
+  ifneq ($(filter-out help list-% image-%,$(MAKECMDGOALS)),)
+    ifeq ($(MACHINE),)
+      $(info Available machines are:)
+      $(foreach m_name, $(filter-out %common, $(notdir $(wildcard machine/*))), $(info $(m_name)))
+      $(error Variable MACHINE must be set!)
+    endif
+
+    # Include machine config with a possibility to override everything above
+    include machine/$(MACHINE)/$(MACHINE_CONFIG).mk
+  endif
+endif
 
 comma := ,
 # Iterate over lines in LAYERS and fill necessary variables
@@ -167,10 +181,11 @@ $(BUILD_DIR):
 
 configure: $(BUILD_DIR)/conf/local.conf
 
+# Build directory is created by oe-init-build-env script,
+# which is called every run from container entrypoint script
 $(BUILD_DIR)/conf/local.conf:
 	@echo Creating new build directory: $(BUILD_DIR)
-	@$(DOCKER_RUN) "cd $(DOCKER_WORK_DIR)/$(SOURCES_DIR) && source oe-init-build-env $(DOCKER_WORK_DIR)/$(BUILD_DIR)" > /dev/null
-	@$(DOCKER_RUN) "bitbake-layers add-layer $(addprefix $(DOCKER_WORK_DIR)/,$(LAYERS_DIR))" > /dev/null
+	@$(DOCKER_RUN) "bitbake-layers add-layer $(addprefix $(DOCKER_WORK_DIR)/,$(LAYERS_DIR))"
 	@printf "%s\n" $(LOCAL_CONF_OPT) >> $(BUILD_DIR)/conf/local.conf
 
 	@echo Creating config .config.mk
@@ -193,7 +208,7 @@ remove-layer: configure
 	done
 
 clean-bbconfigs:
-	rm $(BUILD_DIR)/conf/local.conf $(BUILD_DIR)/conf/bblayers.conf
+	rm -f $(BUILD_DIR)/conf/local.conf $(BUILD_DIR)/conf/bblayers.conf
 
 clean-deploy:
 	rm -rf $(BUILD_DIR)/tmp/deploy

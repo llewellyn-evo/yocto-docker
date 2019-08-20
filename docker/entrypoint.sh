@@ -27,16 +27,23 @@ echo 'ALL ALL = (ALL) NOPASSWD: ALL' >> /etc/sudoers
 
 chown -R ${USER_UID}:${USER_GID} /home/${USER}
 export HOME=/home/$USER
-
 export WORKDIR="$(pwd)"
+
 if [ -f ../sources/oe-init-build-env ]; then
+    # If local.conf does not exist (first run), create it using oe-init-build-env,
+    # running as non-privileged user
+    if [ ! -f "$WORKDIR/conf/local.conf" ]; then
+        su -ms /bin/bash "${USER}" -c "cd ../sources; source oe-init-build-env "$WORKDIR" > /dev/null"
+    fi
+
+    # Run oe-init-build-env to initialize environment variables
     cd ../sources
     source oe-init-build-env "$WORKDIR" > /dev/null
     echo ENV_SUPATH PATH=$PATH >> /etc/login.defs
     echo ENV_PATH   PATH=$PATH >> /etc/login.defs
 fi
 
-# Tuning bas
+# Tuning bash
 # enable bash completion
 sed -i '/enable bash completion/!b;:z;n;s/^#//;tz' /etc/bash.bashrc
 
@@ -48,7 +55,7 @@ help() {
 }
 END
 
-# switch to current user
+# Switch to current user preserving environment
 if [ $# -gt 0 ]; then
     su -ms /bin/bash "${USER}" -c "$*"
 else
