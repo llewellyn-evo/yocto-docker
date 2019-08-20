@@ -21,8 +21,13 @@ DOCKER_BIND       = -v $$(pwd):$(DOCKER_WORK_DIR) \
                     -e HOST_GID=$(shell id -g) \
                     -e USER=$(USER) \
                     -h $(DOCKER_HOST_NAME) \
+					$(DOCKER_SSH_AUTH_SOCK) \
                     --add-host=$(DOCKER_HOST_NAME):127.0.0.1 \
                     --network=host
+
+ifneq ($(SSH_AUTH_SOCK),)
+	DOCKER_SSH_AUTH_SOCK = -v $(dir $(SSH_AUTH_SOCK)):$(dir $(SSH_AUTH_SOCK)) -e SSH_AUTH_SOCK=$(SSH_AUTH_SOCK)
+endif
 
 # Cmdline to run docker.
 DOCKER_RUN        = docker run -it --rm $(DOCKER_BIND)        \
