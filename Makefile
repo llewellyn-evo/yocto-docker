@@ -1,6 +1,9 @@
 # Docker/Yocto Build System Setup
 #     by komar@evologics.de 2018-2019 Evologics GmbH
 # This project helps make build system for embedded platform by using docker and yocto.
+#
+# TODO: add Makefile to build-* directory, to call ../Makefile. which detected
+# if make runned inside docker, call same commands with bitbake, but without docker
 
 MACHINE_CONFIG    = default
 
