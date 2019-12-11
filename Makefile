@@ -39,6 +39,7 @@ ifneq (,$(wildcard home/.use_home))
     DOCKER_BIND += -v $$(pwd)/home/:/home/$(USER)/
 else
     DOCKER_BIND += -v $(HOME)/.ssh:/home/$(USER)/.ssh        \
+        -v $(HOME)/.git:/home/$(USER)/.git \
         -v $(HOME)/.bash_history:/home/$(USER)/.bash_history \
         -v $(HOME)/.screenrc:/home/$(USER)/.screenrc         \
         -v $(HOME)/.tmux.conf:/home/$(USER)/.tmux.conf
