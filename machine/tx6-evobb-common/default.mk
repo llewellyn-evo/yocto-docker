@@ -14,16 +14,18 @@ OLDVARS := $(sort $(.VARIABLES))
 PACKAGE_CLASSES             = package_ipk
 TCLIBC                      = glibc
 CORE_IMAGE_EXTRA_INSTALL    = opkg dropbear \
-                              screen tcl expect rsync socat dune \
+                              screen netcat-openbsd tcl expect rsync socat dune \
                               can-utils i2c-tools daemonize \
                               iproute2 ltrace file pciutils usbutils \
                               rsync procps \
                               ethtool util-linux monit \
-			      kernel-devicetree
+                              kernel-devicetree \
+                              fuse-exfat bash e2fsprogs exfat-utils
 #CORE_IMAGE_EXTRA_INSTALL  += strace openssh-client keychain
 #CORE_IMAGE_EXTRA_INSTALL  += chrony gpsd-tiny pps-tools kernel-module-pps-gpio
 
 PREFERRED_VERSION_linux-karo = 4.4.y
+PRSERV_HOST = localhost:0
 
 # Actually add recorded variables to LOCAL_CONF_OPT
 NEWVARS := $(sort $(.VARIABLES))
@@ -51,7 +53,7 @@ YOCTO_RELEASE     = thud
 # 	* subdirs=<subdirectory with meta-layer>[,<subdirectory with meta-layer>]
 LAYERS           += https://github.com/linux4sam/meta-atmel      \
                     https://github.com/ramok/meta-acme           \
-                    git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-python,meta-networking \
+                    git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-python,meta-networking,meta-filesystems \
                     https://git.yoctoproject.org/git/meta-freescale \
                     https://github.com/evologics/meta-freescale-3rdparty \
                     https://github.com/sbabic/meta-swupdate \
