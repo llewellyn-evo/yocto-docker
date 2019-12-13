@@ -13,7 +13,7 @@ OLDVARS := $(sort $(.VARIABLES))
 # Define what we need
 PACKAGE_CLASSES             = package_ipk
 TCLIBC                      = glibc
-CORE_IMAGE_EXTRA_INSTALL    = opkg dropbear \
+CORE_IMAGE_EXTRA_INSTALL    = opkg dropbear rng-tools \
                               screen netcat-openbsd tcl expect rsync socat dune \
                               can-utils i2c-tools daemonize \
                               iproute2 ltrace file pciutils usbutils \
