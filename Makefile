@@ -196,6 +196,8 @@ $(BUILD_DIR)/conf/local.conf:
 	@echo "MACHINE ?= $(MACHINE)" > .config.mk
 	@echo "MACHINE_CONFIG ?= $(MACHINE_CONFIG)" >> .config.mk
 
+	@ln -sf build/tmp/deploy/images/$(MACHINE) deploy-images
+
 .PHONY: add-layer remove-layer clean-bbconfigs clean-deploy cleanall package-index ipk-server
 add-layer: configure layers
 	@for LAYER in $(LAYERS_DIR); do \
@@ -212,7 +214,7 @@ remove-layer: configure
 	done
 
 clean-bbconfigs:
-	rm -f $(BUILD_DIR)/conf/local.conf $(BUILD_DIR)/conf/bblayers.conf
+	rm -f $(BUILD_DIR)/conf/local.conf $(BUILD_DIR)/conf/bblayers.conf deploy-images
 
 clean-deploy:
 	rm -rf $(BUILD_DIR)/tmp/deploy

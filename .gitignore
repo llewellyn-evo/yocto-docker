@@ -3,3 +3,4 @@ build*/
 poky-container/
 source*/
 home/*
+deploy-*
