@@ -27,6 +27,8 @@ CORE_IMAGE_EXTRA_INSTALL    = opkg dropbear rng-tools \
 PREFERRED_VERSION_linux-karo = 4.4.y
 PRSERV_HOST = localhost:0
 
+DISTRO_FEATURES_remove = bluetooth
+
 # Actually add recorded variables to LOCAL_CONF_OPT
 NEWVARS := $(sort $(.VARIABLES))
 $(call add_to_local_conf_opt)
