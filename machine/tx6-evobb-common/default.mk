@@ -14,8 +14,8 @@ OLDVARS := $(sort $(.VARIABLES))
 PACKAGE_CLASSES             = package_ipk
 TCLIBC                      = glibc
 CORE_IMAGE_EXTRA_INSTALL    = opkg dropbear rng-tools \
-                              screen netcat-openbsd tcl expect rsync socat dune \
-                              can-utils i2c-tools daemonize \
+                              screen tmux netcat-openbsd tcl expect rsync socat dune \
+                              tar can-utils i2c-tools daemonize \
                               iproute2 ltrace file pciutils usbutils \
                               rsync procps \
                               ethtool util-linux monit \
