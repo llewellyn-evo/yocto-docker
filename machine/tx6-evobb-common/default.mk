@@ -24,7 +24,7 @@ CORE_IMAGE_EXTRA_INSTALL    = opkg dropbear rng-tools \
 #CORE_IMAGE_EXTRA_INSTALL  += strace openssh-client keychain
 #CORE_IMAGE_EXTRA_INSTALL  += chrony gpsd-tiny pps-tools kernel-module-pps-gpio
 
-PREFERRED_VERSION_linux-karo = 4.4.y
+PREFERRED_PROVIDER_virtual/kernel = linux-toradex
 PRSERV_HOST = localhost:0
 
 DISTRO_FEATURES_remove = bluetooth
@@ -59,6 +59,8 @@ LAYERS           += https://github.com/linux4sam/meta-atmel      \
                     https://git.yoctoproject.org/git/meta-freescale \
                     https://github.com/evologics/meta-freescale-3rdparty \
                     https://github.com/sbabic/meta-swupdate \
+                    git://git.toradex.com/meta-toradex-bsp-common.git \
+                    git://git.toradex.com/meta-toradex-nxp.git \
                     https://github.com/evologics/meta-evo
 
 MACHINE_BITBAKE_TARGETS = u-boot
