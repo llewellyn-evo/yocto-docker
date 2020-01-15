@@ -5,8 +5,6 @@
 # TODO: add Makefile to build-* directory, to call ../Makefile. which detected
 # if make runned inside docker, call same commands with bitbake, but without docker
 
-MACHINE_CONFIG    = default
-
 # Folders with source and build files
 SOURCES_DIR       = sources
 BUILD_DIR        ?= build-$(MACHINE)
@@ -52,6 +50,8 @@ DOCKER_HOST_NAME=build-$(subst :,-,$(subst /,-,$(MACHINE)))
 
 # Include saved config
 -include .config.mk
+# Use default MACHINE_CONFIG if it`s not defined
+MACHINE_CONFIG ?= default
 
 define add_to_local_conf_opt
   $(foreach V, $(NEWVARS), \
