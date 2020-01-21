@@ -16,12 +16,12 @@ TCLIBC                      = glibc
 CORE_IMAGE_EXTRA_INSTALL    = opkg dropbear rng-tools \
                               screen tmux netcat-openbsd tcl expect rsync socat dune \
                               tar can-utils i2c-tools daemonize \
-                              iproute2 ltrace file pciutils usbutils \
+                              iproute2 ltrace strace file pciutils usbutils \
                               rsync procps \
                               ethtool util-linux monit \
                               kernel-devicetree \
                               fuse-exfat bash e2fsprogs exfat-utils
-#CORE_IMAGE_EXTRA_INSTALL  += strace openssh-client keychain
+#CORE_IMAGE_EXTRA_INSTALL  += openssh-client keychain
 #CORE_IMAGE_EXTRA_INSTALL  += chrony gpsd-tiny pps-tools kernel-module-pps-gpio
 
 PREFERRED_PROVIDER_virtual/kernel = linux-toradex
