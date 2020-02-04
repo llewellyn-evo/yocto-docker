@@ -1,4 +1,5 @@
 include machine/tx6-evobb-common/qemu-target.mk
+include machine/tx6-evobb-common/hyscan.mk
 
 LAYERS += $(SOURCES_DIR)/meta-evo-private
 LOCAL_CONF_OPT += 'MACHINEOVERRIDES =. "sonobot:sonobot-$${EVOSN}:"' \
