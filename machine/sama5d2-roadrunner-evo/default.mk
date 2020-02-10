@@ -2,11 +2,14 @@
 IMAGE_NAME        = evologics-base-image
 
 # Options to append into local.conf
-LOCAL_CONF_OPT    = 'MACHINE            = "$(MACHINE)"'    \
-                    'PACKAGE_CLASSES    = "package_ipk"'   \
-                    'DISTRO             = "poky-evo"' 	   \
-                    'TCLIBC             = "musl"'          \
-                    'BBMASK            += ".*karo.*"'
+LOCAL_CONF_OPT  = 'MACHINE            = "$(MACHINE)"'
+LOCAL_CONF_OPT += 'PACKAGE_CLASSES    = "package_ipk"'
+LOCAL_CONF_OPT += 'DISTRO             = "poky-evo"'
+LOCAL_CONF_OPT += 'TCLIBC             = "musl"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*karo.*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*linux-fslc.*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*linux-toradex.*"'
+
 
 # If layer branch not set with "branch=" option, YOCTO_RELEASE will be used.
 # If layer has no such branch, 'master' branch will be used.
