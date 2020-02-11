@@ -7,8 +7,7 @@ LOCAL_CONF_OPT += 'PACKAGE_CLASSES    = "package_ipk"'
 LOCAL_CONF_OPT += 'DISTRO             = "poky-evo"'
 LOCAL_CONF_OPT += 'TCLIBC             = "musl"'
 LOCAL_CONF_OPT += 'BBMASK            += ".*karo.*"'
-LOCAL_CONF_OPT += 'BBMASK            += ".*linux-fslc.*"'
-LOCAL_CONF_OPT += 'BBMASK            += ".*linux-toradex.*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*toradex.*"'
 
 
 # If layer branch not set with "branch=" option, YOCTO_RELEASE will be used.
