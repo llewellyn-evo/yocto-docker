@@ -36,13 +36,6 @@ OLDVARS := $(sort $(.VARIABLES))
 NEWVARS := $(sort $(.VARIABLES))
 $(call add_to_local_conf_opt)
 
-# Options to append into local.conf
-#LOCAL_CONF_OPT    = 'MACHINE            = "$(MACHINE)"'                                  \
-#                    'PACKAGE_CLASSES    = "$(PACKAGE_CLASSES)"'                          \
-#                    'TCLIBC             = "$(TCLIBC)"'                                   \
-#                    'CORE_IMAGE_EXTRA_INSTALL    += "$(CORE_IMAGE_EXTRA_INSTALL)"'       \
-#                    'PREFERRED_VERSION_linux-karo = "$(PREFERRED_VERSION_linux-karo)"'   \
-
 # Build dir
 BUILD_DIR         = build
 
