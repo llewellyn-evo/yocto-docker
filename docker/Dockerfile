@@ -19,7 +19,7 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen && locale-gen && \
         xz-utils debianutils iputils-ping libncurses5-dev libtinfo-dev \
         build-essential sudo wget git-core perl-base \
         libncurses5-dev libtinfo-dev \
-        tmux screen bash-completion \
+        tmux screen bash-completion vim-tiny \
         openssh-client rsync \
     && \
     rm -rf /var/lib/apt/lists/*
