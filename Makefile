@@ -56,7 +56,10 @@ MACHINE_CONFIG ?= default
 define add_to_local_conf_opt
   $(foreach V, $(NEWVARS), \
     $(if $(filter-out OLDVARS $(OLDVARS), $V), \
-      $(eval LOCAL_CONF_OPT += '$V = "$($V)"')) \
+	  $(if $(findstring pend, $V), \
+      $(eval LOCAL_CONF_OPT += '$V = " $($V) "'), \
+      $(eval LOCAL_CONF_OPT += '$V = "$($V)"') \
+	  )) \
    )
 endef
 
