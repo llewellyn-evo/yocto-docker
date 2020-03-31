@@ -13,21 +13,30 @@ OLDVARS := $(sort $(.VARIABLES))
 # Define what we need
 PACKAGE_CLASSES             = package_ipk
 TCLIBC                      = glibc
-CORE_IMAGE_EXTRA_INSTALL    = opkg dropbear rng-tools \
-                              screen tmux netcat-openbsd tcl expect rsync socat dune \
-                              tar can-utils i2c-tools daemonize \
-                              iproute2 ltrace strace file pciutils usbutils \
-                              rsync procps \
-                              ethtool util-linux monit \
-                              kernel-devicetree \
-                              fuse-exfat bash e2fsprogs exfat-utils
+
+# Must have for the platform
+CORE_IMAGE_EXTRA_INSTALL    = rng-tools iproute2
+# Very useful software
+CORE_IMAGE_EXTRA_INSTALL   += opkg dropbear bash tar monit procps util-linux
+# Useful software
+CORE_IMAGE_EXTRA_INSTALL   += netcat-openbsd screen tmux socat rsync file daemonize
+# Hardware tools
+CORE_IMAGE_EXTRA_INSTALL   += can-utils i2c-tools pps-tools pciutils usbutils ethtool
+# Development
+CORE_IMAGE_EXTRA_INSTALL   += ltrace strace kernel-devicetree tcl expect
+# FAT/exFAT support
+CORE_IMAGE_EXTRA_INSTALL   += fuse-exfat e2fsprogs exfat-utils
+# Init for read-only rootfs
+CORE_IMAGE_EXTRA_INSTALL   += evo-envinit
+
 #CORE_IMAGE_EXTRA_INSTALL  += openssh-client keychain
-#CORE_IMAGE_EXTRA_INSTALL  += chrony gpsd-tiny pps-tools kernel-module-pps-gpio
+#CORE_IMAGE_EXTRA_INSTALL  += chrony gpsd-tiny kernel-module-pps-gpio
 
 PREFERRED_PROVIDER_virtual/kernel = linux-toradex
 PRSERV_HOST = localhost:0
 
 DISTRO_FEATURES_remove = bluetooth
+EXTRA_IMAGE_FEATURES_append = read-only-rootfs
 
 # Actually add recorded variables to LOCAL_CONF_OPT
 NEWVARS := $(sort $(.VARIABLES))
