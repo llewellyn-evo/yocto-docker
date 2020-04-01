@@ -1,4 +1,4 @@
-include machine/tx6-evobb-common/qemu-target.mk
+include machine/append-sw-common/qemu-target.mk
 
 LAYERS += $(SOURCES_DIR)/meta-evo-private
 LOCAL_CONF_OPT += 'MACHINEOVERRIDES =. "navimum-swom:navimum-swom-$${EVOSN}:"' \
