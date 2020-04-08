@@ -1,1 +1,1 @@
-include machine/tx6-evobb-common/default.mk
+include machine/mx6-evobb-common/default.mk
