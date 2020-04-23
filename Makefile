@@ -200,6 +200,7 @@ $(BUILD_DIR)/conf/local.conf:
 	@echo "MACHINE_CONFIG ?= $(MACHINE_CONFIG)" >> .config.mk
 
 	@ln -sf build/tmp/deploy/images/$(MACHINE) deploy-images
+	@ln -sf build/tmp/deploy/ipk deploy-ipk
 
 .PHONY: add-layer remove-layer clean-bbconfigs clean-deploy cleanall package-index ipk-server
 add-layer: configure layers
