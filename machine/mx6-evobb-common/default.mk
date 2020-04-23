@@ -17,7 +17,8 @@ TCLIBC                      = glibc
 # Must have for the platform
 CORE_IMAGE_EXTRA_INSTALL    = rng-tools iproute2
 # Very useful software
-CORE_IMAGE_EXTRA_INSTALL   += opkg dropbear bash tar monit procps util-linux
+CORE_IMAGE_EXTRA_INSTALL   += opkg dropbear bash tar monit procps util-linux \
+                              e2fsprogs e2fsprogs-resize2fs
 # Useful software
 CORE_IMAGE_EXTRA_INSTALL   += netcat-openbsd screen tmux socat rsync file daemonize
 # Hardware tools
@@ -25,7 +26,7 @@ CORE_IMAGE_EXTRA_INSTALL   += can-utils i2c-tools pps-tools pciutils usbutils et
 # Development
 CORE_IMAGE_EXTRA_INSTALL   += ltrace strace kernel-devicetree tcl expect
 # FAT/exFAT support
-CORE_IMAGE_EXTRA_INSTALL   += fuse-exfat e2fsprogs exfat-utils
+CORE_IMAGE_EXTRA_INSTALL   += fuse-exfat exfat-utils
 # Init for read-only rootfs
 CORE_IMAGE_EXTRA_INSTALL   += evo-envinit
 
@@ -41,13 +42,6 @@ EXTRA_IMAGE_FEATURES_append = read-only-rootfs
 # Actually add recorded variables to LOCAL_CONF_OPT
 NEWVARS := $(sort $(.VARIABLES))
 $(call add_to_local_conf_opt)
-
-# Options to append into local.conf
-#LOCAL_CONF_OPT    = 'MACHINE            = "$(MACHINE)"'                                  \
-#                    'PACKAGE_CLASSES    = "$(PACKAGE_CLASSES)"'                          \
-#                    'TCLIBC             = "$(TCLIBC)"'                                   \
-#                    'CORE_IMAGE_EXTRA_INSTALL    += "$(CORE_IMAGE_EXTRA_INSTALL)"'       \
-#                    'PREFERRED_VERSION_linux-karo = "$(PREFERRED_VERSION_linux-karo)"'   \
 
 # Build dir
 BUILD_DIR         = build
