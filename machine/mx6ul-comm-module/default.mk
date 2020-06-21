@@ -1,20 +1,10 @@
 # Image name to build by default
-IMAGE_NAME        = commod-minimal-image
+IMAGE_NAME        = core-image-minimal
 
 # MACHINE is a must in local.conf
 LOCAL_CONF_OPT    = 'MACHINE = "$(MACHINE)"'
 
 LOCAL_CONF_OPT    += 'DISTRO  = "yogurt"'
-
-# - "Makes an image suitable for development (e.g. allows root logins without
-#    passwords and enables post-installation logging)"
-LOCAL_CONF_OPT    += 'EXTRA_IMAGE_FEATURES += "debug-tweaks"'
-
-# Turn on debugging options of the kernel
-#LOCAL_CONF_OPT    += 'DEBUG_BUILD_pn-linux-mainline = "1"'
-
-# Turn on debugging options of the barebox
-#LOCAL_CONF_OPT    += 'DEBUG_BUILD_pn-barebox = "1"'
 
 # Select configuration UI for linux and barebox r \ecipe. The openembedd
 # default is 'menuconfig', 'nconfig' has more features.
@@ -22,8 +12,32 @@ LOCAL_CONF_OPT    += 'EXTRA_IMAGE_FEATURES += "debug-tweaks"'
 LOCAL_CONF_OPT    += 'KCONFIG_CONFIG_COMMAND = "nconfig"'
 LOCAL_CONF_OPT    += 'KCONFIG_CONFIG_COMMAND_pn-busybox = "menuconfig"'
 
+# Must have for the platform
+LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " rng-tools iproute2 coreutils grep bridge-utils iputils"'
+# Very useful software
+LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " opkg dropbear bash tar monit procps util-linux"'
+# Useful software
+LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " netcat-openbsd screen tmux socat rsync file daemonize gzip"'
+# Hardware tools
+LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " can-utils i2c-tools pps-tools pciutils usbutils ethtool"'
+# Development
+LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " ltrace strace kernel-devicetree tcl expect"'
+# FAT/exFAT support
+LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " fuse-exfat e2fsprogs exfat-utils e2fsprogs-resize2fs parted"'
+# Init for read-only rootfs
+LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " evo-envinit"'
+# Communication Module Specific
+LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " gpsd-tiny chrony"'
+# Read only rootfs
+LOCAL_CONF_OPT 	  += 'EXTRA_IMAGE_FEATURES_append = " read-only-rootfs"'
+
 LOCAL_CONF_OPT    += 'PACKAGE_CLASSES = "package_ipk"'
 
+LOCAL_CONF_OPT += 'BBMASK            += ".*swupdate*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*karo.*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*toradex.*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*at91.*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*librsync.*"'
 
 # Start recording variables which will go to te local.conf file
 # If you want do redefine the variable VAR previously set, first use:
@@ -34,6 +48,7 @@ OLDVARS := $(sort $(.VARIABLES))
 
 # Actually add recorded variables to LOCAL_CONF_OPT
 NEWVARS := $(sort $(.VARIABLES))
+
 $(call add_to_local_conf_opt)
 
 # Build dir
@@ -49,9 +64,9 @@ YOCTO_RELEASE     = thud
 # Possible options:
 # 	* branch=<branch-to-clone>
 # 	* subdirs=<subdirectory with meta-layer>[,<subdirectory with meta-layer>]
-LAYERS           += https://github.com/llewellyn-evo/meta-commod.git     \
+LAYERS           += https://github.com/EvoLogics/meta-evo.git     \
                     https://github.com/joaohf/meta-erlang;branch=master \
-                    git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-python,meta-networking,meta-filesystems,meta-initramfs,meta-multimedia,meta-perl,meta-webserver\
+                    git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-python,meta-networking,meta-filesystems,meta-initramfs,meta-multimedia,meta-perl,meta-webserver,\
                     https://git.phytec.de/meta-phytec \
                     https://git.phytec.de/meta-yogurt \
                     https://github.com/rauc/meta-rauc.git \
