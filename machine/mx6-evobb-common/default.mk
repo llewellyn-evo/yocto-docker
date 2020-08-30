@@ -20,9 +20,9 @@ CORE_IMAGE_EXTRA_INSTALL    = rng-tools iproute2
 CORE_IMAGE_EXTRA_INSTALL   += opkg dropbear bash tar monit procps util-linux \
                               e2fsprogs e2fsprogs-resize2fs
 # Useful software
-CORE_IMAGE_EXTRA_INSTALL   += netcat-openbsd screen tmux socat rsync file daemonize
+CORE_IMAGE_EXTRA_INSTALL   += netcat-openbsd screen tmux socat rsync file daemonize ntp curl
 # Hardware tools
-CORE_IMAGE_EXTRA_INSTALL   += can-utils i2c-tools pps-tools pciutils usbutils ethtool
+CORE_IMAGE_EXTRA_INSTALL   += can-utils i2c-tools pps-tools pciutils usbutils ethtool libgpiod
 # Development
 CORE_IMAGE_EXTRA_INSTALL   += ltrace strace kernel-devicetree tcl expect
 # FAT/exFAT support
