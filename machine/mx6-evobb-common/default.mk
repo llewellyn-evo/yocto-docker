@@ -18,7 +18,7 @@ TCLIBC                      = glibc
 CORE_IMAGE_EXTRA_INSTALL    = rng-tools iproute2
 # Very useful software
 CORE_IMAGE_EXTRA_INSTALL   += opkg dropbear bash tar monit procps util-linux \
-                              e2fsprogs e2fsprogs-resize2fs
+                              e2fsprogs e2fsprogs-resize2fs iputils
 # Useful software
 CORE_IMAGE_EXTRA_INSTALL   += netcat-openbsd screen tmux socat rsync file daemonize curl
 # Hardware tools
