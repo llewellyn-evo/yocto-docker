@@ -18,20 +18,22 @@ TCLIBC                      = glibc
 CORE_IMAGE_EXTRA_INSTALL    = rng-tools iproute2
 # Very useful software
 CORE_IMAGE_EXTRA_INSTALL   += opkg dropbear bash tar monit procps util-linux \
-                              e2fsprogs e2fsprogs-resize2fs
+                              e2fsprogs e2fsprogs-resize2fs iputils
 # Useful software
-CORE_IMAGE_EXTRA_INSTALL   += netcat-openbsd screen tmux socat rsync file daemonize ntp curl
+CORE_IMAGE_EXTRA_INSTALL   += netcat-openbsd screen tmux socat rsync file daemonize curl
 # Hardware tools
 CORE_IMAGE_EXTRA_INSTALL   += can-utils i2c-tools pps-tools pciutils usbutils ethtool libgpiod
 # Development
 CORE_IMAGE_EXTRA_INSTALL   += ltrace strace kernel-devicetree tcl expect
+# Time synchronisation
+CORE_IMAGE_EXTRA_INSTALL   += gpsd-tiny chrony
 # FAT/exFAT support
 CORE_IMAGE_EXTRA_INSTALL   += fuse-exfat exfat-utils
 # Init for read-only rootfs
 CORE_IMAGE_EXTRA_INSTALL   += evo-envinit
 
 #CORE_IMAGE_EXTRA_INSTALL  += openssh-client keychain
-#CORE_IMAGE_EXTRA_INSTALL  += chrony gpsd-tiny kernel-module-pps-gpio
+#CORE_IMAGE_EXTRA_INSTALL  += ntp kernel-module-pps-gpio
 
 PREFERRED_PROVIDER_virtual/kernel = linux-toradex
 PRSERV_HOST = localhost:0

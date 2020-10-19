@@ -240,9 +240,11 @@ ipk-server: package-index
 	@echo 'Add following lines to /etc/opkg/opkg.conf'
 	@echo ''
 	$(eval ipk-archs := $(wildcard $(BUILD_DIR)/tmp/deploy/ipk/*))
-	@$(foreach arch, $(ipk-archs),                                      \
-	    $(eval arch_strip := $(lastword $(subst /,  ,$(arch))))         \
-	    echo 'src/gz $(arch_strip) http://$(IP):$(PORT)/$(arch_strip)'; \
+	@$(foreach arch, $(sort $(ipk-archs)),                                   \
+	    $(eval arch_strip := $(lastword $(subst /,  ,$(arch))))              \
+	    $(if $(filter-out Packages sdk% %sdk, $(arch_strip)),                \
+	        echo 'src/gz $(arch_strip) http://$(IP):$(PORT)/$(arch_strip)';  \
+	    ) \
 	)
 	@echo ''
 	@cd $(BUILD_DIR)/tmp/deploy/ipk/ && python -m SimpleHTTPServer $(PORT)
