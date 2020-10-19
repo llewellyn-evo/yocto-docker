@@ -19,9 +19,9 @@ LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " opkg dropbear bash tar monit procp
 # Useful software
 LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " netcat-openbsd screen tmux socat rsync file daemonize gzip"'
 # Hardware tools
-LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " can-utils i2c-tools pps-tools pciutils usbutils ethtool"'
+LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " can-utils i2c-tools pps-tools usbutils ethtool"'
 # Development
-LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " ltrace strace kernel-devicetree tcl expect"'
+LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " ltrace strace kernel-devicetree tcl expect tcpdump"'
 # FAT/exFAT support
 LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " fuse-exfat e2fsprogs exfat-utils e2fsprogs-resize2fs parted"'
 # Init for read-only rootfs
