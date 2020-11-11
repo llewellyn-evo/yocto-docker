@@ -1,3 +1,4 @@
+*.sw?
 .config.mk
 build*/
 poky-container/
