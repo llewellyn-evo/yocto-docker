@@ -10,4 +10,4 @@ include machine/append-sw-common/hyscan.mk
 include machine/append-sw-common/dune.mk
 
 # Vehicle number
-LOCAL_CONF_OPT += 'EVOSN = "5001"'
+LOCAL_CONF_OPT += 'EVOSN = "5003"'
