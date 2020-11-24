@@ -26,7 +26,7 @@ CORE_IMAGE_EXTRA_INSTALL   += can-utils i2c-tools pps-tools pciutils usbutils et
 # Development
 CORE_IMAGE_EXTRA_INSTALL   += ltrace strace kernel-devicetree tcl expect
 # Time synchronisation
-CORE_IMAGE_EXTRA_INSTALL   += gpsd-tiny chrony
+CORE_IMAGE_EXTRA_INSTALL   += gpsd-tiny chrony chronyc
 # FAT/exFAT support
 CORE_IMAGE_EXTRA_INSTALL   += fuse-exfat exfat-utils
 # Init for read-only rootfs
