@@ -64,7 +64,7 @@ YOCTO_RELEASE     = thud
 # Possible options:
 # 	* branch=<branch-to-clone>
 # 	* subdirs=<subdirectory with meta-layer>[,<subdirectory with meta-layer>]
-LAYERS           += https://github.com/llewellyn-evo/meta-evo.git  				   		\
+LAYERS           += https://github.com/EvoLogics/meta-evo.git  				   			\
                     git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-python,meta-networking,meta-filesystems,meta-initramfs,meta-multimedia,meta-perl,meta-webserver,\
                     https://git.phytec.de/meta-phytec 									\
                     https://git.phytec.de/meta-yogurt 									\
