@@ -17,7 +17,7 @@ LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " rng-tools iproute2 coreutils grep 
 # Very useful software
 LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " opkg dropbear bash tar monit procps util-linux"'
 # Useful software
-LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " netcat-openbsd screen tmux socat rsync file daemonize gzip"'
+LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " netcat-openbsd screen tmux socat rsync file daemonize gzip rlwrap"'
 # Hardware tools
 LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " can-utils i2c-tools pps-tools usbutils ethtool"'
 # Development
@@ -27,17 +27,17 @@ LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " fuse-exfat e2fsprogs exfat-utils e
 # Init for read-only rootfs
 LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " evo-envinit"'
 # Communication Module Specific
-LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " gpsd-tiny chrony"'
+LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " gpsd-tiny chrony dt-utils dt-utils-barebox-state"'
 # Read only rootfs
-LOCAL_CONF_OPT 	  += 'EXTRA_IMAGE_FEATURES_append = " read-only-rootfs"'
+LOCAL_CONF_OPT 	 += 'EXTRA_IMAGE_FEATURES_append = " read-only-rootfs"'
+# Add 100MB Extra to Rootfs
+LOCAL_CONF_OPT 	 += 'IMAGE_ROOTFS_EXTRA_SPACE = "100000"'
 
 LOCAL_CONF_OPT    += 'PACKAGE_CLASSES = "package_ipk"'
 
-LOCAL_CONF_OPT += 'BBMASK            += ".*swupdate*"'
 LOCAL_CONF_OPT += 'BBMASK            += ".*karo.*"'
 LOCAL_CONF_OPT += 'BBMASK            += ".*toradex.*"'
 LOCAL_CONF_OPT += 'BBMASK            += ".*at91.*"'
-LOCAL_CONF_OPT += 'BBMASK            += ".*librsync.*"'
 
 # Start recording variables which will go to te local.conf file
 # If you want do redefine the variable VAR previously set, first use:
@@ -64,11 +64,11 @@ YOCTO_RELEASE     = thud
 # Possible options:
 # 	* branch=<branch-to-clone>
 # 	* subdirs=<subdirectory with meta-layer>[,<subdirectory with meta-layer>]
-LAYERS           += https://github.com/EvoLogics/meta-evo.git     \
-                    https://github.com/joaohf/meta-erlang;branch=master \
+LAYERS           += https://github.com/llewellyn-evo/meta-evo.git  				   		\
                     git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-python,meta-networking,meta-filesystems,meta-initramfs,meta-multimedia,meta-perl,meta-webserver,\
-                    https://git.phytec.de/meta-phytec \
-                    https://git.phytec.de/meta-yogurt \
-                    https://github.com/rauc/meta-rauc.git \
-                    https://github.com/OSSystems/meta-gstreamer1.0.git \
-                    https://github.com/meta-qt5/meta-qt5.git
+                    https://git.phytec.de/meta-phytec 									\
+                    https://git.phytec.de/meta-yogurt 									\
+                    https://github.com/OSSystems/meta-gstreamer1.0.git 					\
+                    https://github.com/meta-qt5/meta-qt5.git 							\
+                    https://github.com/rauc/meta-rauc.git 								\
+                    https://github.com/sbabic/meta-swupdate
