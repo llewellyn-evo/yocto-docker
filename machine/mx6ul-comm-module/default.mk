@@ -13,7 +13,7 @@ LOCAL_CONF_OPT    += 'KCONFIG_CONFIG_COMMAND = "nconfig"'
 LOCAL_CONF_OPT    += 'KCONFIG_CONFIG_COMMAND_pn-busybox = "menuconfig"'
 
 # Must have for the platform
-LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " rng-tools iproute2 coreutils grep bridge-utils iputils"'
+LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " rng-tools iproute2 coreutils grep bridge-utils iputils iperf3"'
 # Very useful software
 LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " opkg dropbear bash tar monit procps util-linux"'
 # Useful software
@@ -71,4 +71,5 @@ LAYERS           += https://github.com/EvoLogics/meta-evo.git  				   			\
                     https://github.com/OSSystems/meta-gstreamer1.0.git 					\
                     https://github.com/meta-qt5/meta-qt5.git 							\
                     https://github.com/rauc/meta-rauc.git 								\
-                    https://github.com/sbabic/meta-swupdate
+                    https://github.com/sbabic/meta-swupdate								\
+                    https://github.com/meta-erlang/meta-erlang.git;branch=master
