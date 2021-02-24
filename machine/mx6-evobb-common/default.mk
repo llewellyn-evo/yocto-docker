@@ -39,7 +39,7 @@ PREFERRED_PROVIDER_virtual/kernel = linux-toradex
 PRSERV_HOST = localhost:0
 
 DISTRO_FEATURES_remove = bluetooth
-EXTRA_IMAGE_FEATURES_append = read-only-rootfs
+EXTRA_IMAGE_FEATURES_append = package-management read-only-rootfs
 
 # Actually add recorded variables to LOCAL_CONF_OPT
 NEWVARS := $(sort $(.VARIABLES))
