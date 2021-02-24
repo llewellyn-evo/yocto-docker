@@ -41,6 +41,8 @@ PRSERV_HOST = localhost:0
 DISTRO_FEATURES_remove = bluetooth
 EXTRA_IMAGE_FEATURES_append = package-management read-only-rootfs
 
+BBMASK_append               = .*at91.*
+
 # Actually add recorded variables to LOCAL_CONF_OPT
 NEWVARS := $(sort $(.VARIABLES))
 $(call add_to_local_conf_opt)
@@ -58,8 +60,7 @@ YOCTO_RELEASE     = thud
 # Possible options:
 # 	* branch=<branch-to-clone>
 # 	* subdirs=<subdirectory with meta-layer>[,<subdirectory with meta-layer>]
-LAYERS           += https://github.com/linux4sam/meta-atmel      \
-                    https://github.com/ramok/meta-acme           \
+LAYERS           += \
                     git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-python,meta-networking,meta-filesystems \
                     https://git.yoctoproject.org/git/meta-freescale \
                     https://github.com/evologics/meta-freescale-3rdparty \
