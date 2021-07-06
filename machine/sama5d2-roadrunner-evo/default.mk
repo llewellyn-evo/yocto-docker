@@ -8,6 +8,11 @@ LOCAL_CONF_OPT += 'DISTRO             = "poky-evo"'
 LOCAL_CONF_OPT += 'TCLIBC             = "musl"'
 LOCAL_CONF_OPT += 'BBMASK            += ".*karo.*"'
 LOCAL_CONF_OPT += 'BBMASK            += ".*toradex.*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*linux-fslc.*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*barebox.*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*-phy[0-9].*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*-phy[0-9].*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*systemd-machine-units.bb.*"'
 
 
 # If layer branch not set with "branch=" option, YOCTO_RELEASE will be used.
@@ -24,7 +29,8 @@ LAYERS           += https://github.com/linux4sam/meta-atmel      \
                     https://github.com/ramok/meta-acme           \
                     https://github.com/evologics/meta-evo        \
                     https://github.com/joaohf/meta-erlang;branch=master \
-                    git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-webserver,meta-python,meta-networking \
+                    git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-webserver,meta-python,meta-networking,meta-filesystems \
+                    git://git.yoctoproject.org/meta-virtualization.git \
                     https://github.com/sbabic/meta-swupdate
 
 MACHINE_BITBAKE_TARGETS = meta-toolchain swupdate-images-evo
