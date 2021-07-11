@@ -4,4 +4,4 @@ LAYERS += $(SOURCES_DIR)/meta-evo-private
 
 #Install SWUPDATE
 LOCAL_CONF_OPT    += 'IMAGE_INSTALL_append = " swupdate swupdate-www"'
-LOCAL_CONF_OPT 	  += 'PREFERRED_VERSION_swupdate = "2020.11"'
+LOCAL_CONF_OPT 	  += 'PREFERRED_VERSION_swupdate = "2021.04"'
