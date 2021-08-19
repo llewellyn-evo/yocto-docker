@@ -154,11 +154,27 @@ help:
 	@echo 'docker$$ bitbake evologics-base-image -c do_populate_sdk'
 	@echo 'docker$$ bitbake evologics-base-image -c do_populate_sdk_ext'
 	@echo ''
+	@echo 'Update package index of local repository'
+	@echo 'docker$$ bitbake package-index'
+	@echo ''
 	@echo 'Modify the source for an existing recipe'
 	@echo 'docker$$ devtool modify virtual/kernel'
 	@echo ''
+	@echo 'Configure kernel'
+	@echo 'docker$$ bitbake virtual/kernel -fc menuconfig'
+	@echo 'docker$$ bitbake virtual/kernel -fc diffconfig'
+	@echo ''
+	@echo 'Create new recipe'
+	@echo 'docker$$ devtool add liblxc https://linuxcontainers.org/downloads/lxc/lxc-4.0.9.tar.gz'
+	@echo ''
 	@echo 'Apply changes from external source tree to recipe'
 	@echo 'docker$$ devtool update-recipe --force-patch-refresh --a /work/sources/meta-evo linux-at91'
+	@echo ''
+	@echo 'Remove a recipe from workspace'
+	@echo 'docker$$ devtool reset linux-at91'
+	@echo ''
+	@echo 'Finish working on a recipe in workspace (update-recipe + reset)'
+	@echo 'docker$$ devtool finish linux-at91 /work/sources/meta-evo'
 
 .PHONY: list-machine list-config layers configure ci-deploy
 list-machine:
@@ -240,15 +256,21 @@ ipk-server: package-index
 	@echo ''
 	@echo 'Add following lines to /etc/opkg/opkg.conf'
 	@echo ''
-	$(eval ipk-archs := $(wildcard $(BUILD_DIR)/tmp/deploy/ipk/*))
-	@$(foreach arch, $(sort $(ipk-archs)),                                   \
-	    $(eval arch_strip := $(lastword $(subst /,  ,$(arch))))              \
-	    $(if $(filter-out Packages sdk% %sdk, $(arch_strip)),                \
-	        echo 'src/gz $(arch_strip) http://$(IP):$(PORT)/$(arch_strip)';  \
-	    ) \
+
+	@# NOTE: path/*/. is trick to match only directory
+	$(eval ipk-archs :=    $(patsubst %/.,%,$(wildcard $(BUILD_DIR)/tmp/deploy/ipk/*/.)))
+	@# filter out directory with -dummy- in name
+	$(eval dummy-filter := $(patsubst %/.,%,$(wildcard $(BUILD_DIR)/tmp/deploy/ipk/*-dummy-*/.)))
+	$(eval ipk-archs :=    $(filter-out $(dummy-filter),$(ipk-archs)))
+
+	@$(foreach arch, $(ipk-archs),                                      \
+	    $(eval arch_strip := $(lastword $(subst /,  ,$(arch))))         \
+	    echo 'src/gz $(arch_strip) http://$(IP):$(PORT)/ipk/$(arch_strip)'; \
 	)
 	@echo ''
-	@cd $(BUILD_DIR)/tmp/deploy/ipk/ && python -m SimpleHTTPServer $(PORT)
+	@cd $(BUILD_DIR)/tmp/deploy/; \
+		python3 -m http.server $(PORT) || \
+		python2 -m SimpleHTTPServer $(PORT)
 
 .PHONY: image-build image-clean image-deploy image-check
 image-build:
