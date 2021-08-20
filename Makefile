@@ -50,6 +50,7 @@ DOCKER_HOST_NAME=build-$(subst :,-,$(subst /,-,$(MACHINE)))
 
 # Include saved config
 -include .config.mk
+-include .ci-config.mk
 # Use default MACHINE_CONFIG if it`s not defined
 MACHINE_CONFIG ?= default
 
@@ -175,7 +176,7 @@ help:
 	@echo 'Finish working on a recipe in workspace (update-recipe + reset)'
 	@echo 'docker$$ devtool finish linux-at91 /work/sources/meta-evo'
 
-.PHONY: list-machine list-config layers configure
+.PHONY: list-machine list-config layers configure ci-deploy
 list-machine:
 	@ls -1 machine/ | grep -v common | sed '/$(MACHINE)[-.]/! s/\b$(MACHINE)\b/ * &/g'
 
@@ -287,4 +288,22 @@ image-check:
 
 image-deploy:
 	@docker push $(DOCKER_IMAGE)
+
+# Naive implementation
+# Does not check for different image formats
+ci-deploy:
+	$(eval CI_DEP_DIR := $(CI_PATH:%/=%)/$(MACHINE)/$(MACHINE_CONFIG))
+	mkdir -p $(CI_DEP_DIR)
+	cp -L deploy-images/$(IMAGE_NAME)-$(MACHINE).tar.bz2 $(CI_DEP_DIR) \
+		|| exit 1
+	cp -L deploy-images/$(MACHINE).dtb $(CI_DEP_DIR) \
+		|| exit 1
+	cp -L deploy-images/modules-$(MACHINE).tgz $(CI_DEP_DIR) \
+		|| exit 1
+	cp -L deploy-images/u-boot-$(MACHINE).bin $(CI_DEP_DIR) \
+		|| exit 1
+	cp -L deploy-images/uImage-$(MACHINE).bin $(CI_DEP_DIR) \
+		|| cp -L deploy-images/zImage-$(MACHINE).bin $(CI_DEP_DIR) \
+		|| exit 1
+
 

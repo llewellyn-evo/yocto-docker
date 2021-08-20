@@ -37,7 +37,7 @@ LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " fuse-exfat e2fsprogs exfat-utils e
 # Init for read-only rootfs
 LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " evo-envinit"'
 # Communication Module Specific
-LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " gpsd-tiny chrony chronyc dt-utils dt-utils-barebox-state"'
+LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " gpsd-tiny chrony dt-utils dt-utils-barebox-state soft-hwclock"'
 # Read only rootfs
 LOCAL_CONF_OPT   += 'EXTRA_IMAGE_FEATURES_append = " package-management read-only-rootfs"'
 # Add 100MB Extra to Rootfs
