@@ -18,7 +18,7 @@ TCLIBC                      = glibc
 CORE_IMAGE_EXTRA_INSTALL    = rng-tools iproute2
 # Very useful software
 CORE_IMAGE_EXTRA_INSTALL   += opkg dropbear bash tar monit procps util-linux \
-                              e2fsprogs e2fsprogs-resize2fs iputils
+                              e2fsprogs e2fsprogs-resize2fs iputils coreutils
 # Useful software
 CORE_IMAGE_EXTRA_INSTALL   += netcat-openbsd screen tmux socat rsync file \
                               daemonize curl rlwrap ckermit iperf3
@@ -26,8 +26,8 @@ CORE_IMAGE_EXTRA_INSTALL   += netcat-openbsd screen tmux socat rsync file \
 CORE_IMAGE_EXTRA_INSTALL   += can-utils cannelloni i2c-tools pps-tools pciutils usbutils ethtool libgpiod
 # Development
 CORE_IMAGE_EXTRA_INSTALL   += ltrace strace kernel-devicetree tcl expect
-# Time synchronisation
-CORE_IMAGE_EXTRA_INSTALL   += gpsd-tiny chrony chronyc
+# Time management
+CORE_IMAGE_EXTRA_INSTALL   += gpsd-tiny chrony chronyc soft-hwclock
 # FAT/exFAT support
 CORE_IMAGE_EXTRA_INSTALL   += fuse-exfat exfat-utils
 # Init for read-only rootfs
