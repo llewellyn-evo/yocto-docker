@@ -27,7 +27,7 @@ LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " rng-tools iproute2 coreutils grep 
 # Very useful software
 LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " opkg dropbear bash tar monit procps util-linux ckermit"'
 # Useful software
-LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " netcat-openbsd screen tmux socat rsync file daemonize gzip rlwrap"'
+LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " netcat-openbsd screen tmux socat rsync file daemonize gzip rlwrap lrzsz"'
 # Hardware tools
 LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " can-utils i2c-tools pps-tools usbutils ethtool libgpiod"'
 # Development
@@ -77,3 +77,15 @@ LAYERS           += https://github.com/EvoLogics/meta-evo.git  				   				\
                     https://github.com/meta-erlang/meta-erlang.git;branch=master
 
 MACHINE_BITBAKE_TARGETS = meta-toolchain swupdate-images-evo-comm
+
+
+.PHONY: ci-deploy
+ci-deploy:
+	$(eval CI_DEP_DIR := $(CI_PATH:%/=%)/$(MACHINE)/$(MACHINE_CONFIG))
+	mkdir -p $(CI_DEP_DIR)
+	cp -L deploy-images/barebox.bin $(CI_DEP_DIR) \
+		|| exit 1
+	cp -L deploy-images/core-image-minimal-$(MACHINE).sdcard $(CI_DEP_DIR) \
+		|| exit 1
+	cp -L deploy-images/swupdate-images-evo-comm-$(MACHINE).swu $(CI_DEP_DIR) \
+		|| exit 1
