@@ -80,6 +80,9 @@ ifneq ($(__BASH_MAKE_COMPLETION__),1)
   endif
 endif
 
+# Trick to remove duplicates from LAYERS
+$(eval LAYERS = $(sort $(LAYERS)))
+
 comma := ,
 # Iterate over lines in LAYERS and fill necessary variables
 $(foreach line, $(addprefix url=, $(LAYERS)),                               \
