@@ -74,7 +74,7 @@ LAYERS           += https://github.com/EvoLogics/meta-evo.git  				   				\
                     https://github.com/meta-qt5/meta-qt5.git 								\
                     https://github.com/rauc/meta-rauc.git 								\
                     https://github.com/sbabic/meta-swupdate								\
-                    https://github.com/meta-erlang/meta-erlang.git;branch=master
+                    https://github.com/meta-erlang/meta-erlang.git;branch=zeus
 
 MACHINE_BITBAKE_TARGETS = meta-toolchain swupdate-images-evo-comm
 

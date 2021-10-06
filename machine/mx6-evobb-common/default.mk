@@ -68,6 +68,7 @@ LAYERS           += \
                     https://github.com/sbabic/meta-swupdate \
                     git://git.toradex.com/meta-toradex-bsp-common.git \
                     git://git.toradex.com/meta-toradex-nxp.git \
+                    https://github.com/meta-erlang/meta-erlang.git;branch=zeus \
                     https://github.com/evologics/meta-evo
 
 MACHINE_BITBAKE_TARGETS = u-boot

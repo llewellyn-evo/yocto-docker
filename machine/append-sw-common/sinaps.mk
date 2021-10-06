@@ -1,5 +1,4 @@
-# Erlang comes from here
-LAYERS += $(SOURCES_DIR)/meta-erlang
+# Erlang OTP21
 LOCAL_CONF_OPT += 'PREFERRED_VERSION_erlang = "21.1%"'
 LOCAL_CONF_OPT += 'PREFERRED_VERSION_erlang-native = "21.1%"'
 
