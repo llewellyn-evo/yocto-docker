@@ -289,21 +289,3 @@ image-check:
 image-deploy:
 	@docker push $(DOCKER_IMAGE)
 
-# Naive implementation
-# Does not check for different image formats
-ci-deploy:
-	$(eval CI_DEP_DIR := $(CI_PATH:%/=%)/$(MACHINE)/$(MACHINE_CONFIG))
-	mkdir -p $(CI_DEP_DIR)
-	cp -L deploy-images/$(IMAGE_NAME)-$(MACHINE).tar.bz2 $(CI_DEP_DIR) \
-		|| exit 1
-	cp -L deploy-images/$(MACHINE).dtb $(CI_DEP_DIR) \
-		|| exit 1
-	cp -L deploy-images/modules-$(MACHINE).tgz $(CI_DEP_DIR) \
-		|| exit 1
-	cp -L deploy-images/u-boot-$(MACHINE).bin $(CI_DEP_DIR) \
-		|| exit 1
-	cp -L deploy-images/uImage-$(MACHINE).bin $(CI_DEP_DIR) \
-		|| cp -L deploy-images/zImage-$(MACHINE).bin $(CI_DEP_DIR) \
-		|| exit 1
-
-
