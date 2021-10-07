@@ -1,6 +1,6 @@
 include machine/mx6ul-comm-module/default.mk
 include machine/append-hw-common/basestation-comm.mk
-include machine/append-sw-common/update.mk
+include machine/append-sw-common/swupdate.mk
 
 LOCAL_CONF_OPT += 'BRIDGE_ADDRESS="172.16.1.31/16"'
 
