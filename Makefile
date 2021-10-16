@@ -70,9 +70,15 @@ ifneq ($(__BASH_MAKE_COMPLETION__),1)
   # Help and targets starting with 'list-*' and 'image-*' do not need MACHINE set
   ifneq ($(filter-out help list-% image-%,$(MAKECMDGOALS)),)
     ifeq ($(MACHINE),)
-      $(info Available machines are:)
-      $(foreach m_name, $(filter-out %common, $(notdir $(wildcard machine/*))), $(info $(m_name)))
-      $(error Variable MACHINE must be set!)
+      ifneq ($(shell test -t 0 && echo tty),)
+        ROOT_DIR:=$(dir $(realpath $(firstword $(MAKEFILE_LIST))))
+        $(shell $(ROOT_DIR)/lazyconf.sh > $$(tty))
+        -include .config.mk
+      else
+        $(info Available machines are:)
+        $(foreach m_name, $(filter-out %common, $(notdir $(wildcard machine/*))), $(info $(m_name)))
+        $(error Variable MACHINE must be set!)
+      endif
     endif
 
     # Include machine config with a possibility to override everything above
