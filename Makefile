@@ -5,16 +5,22 @@
 # TODO: add Makefile to build-* directory, to call ../Makefile. which detected
 # if make runned inside docker, call same commands with bitbake, but without docker
 
+# Uncomment this if you want use local builded docker image
+#USE_LOCAL_DOCKER_IMAGE=1
+
+YOCTO_RELEASE     = thud
+
+DOCKER_REGISTRY   = docker.evologics.de
+DOCKER_IMAGE      = evologics/yocto:$(YOCTO_RELEASE)
+
 # Folders with source and build files
 SOURCES_DIR       = sources
 BUILD_DIR        ?= build-$(MACHINE)
 
 # If layer branch not set with "branch=" option, YOCTO_RELEASE will be used.
 # If layer has no such branch, 'master' branch will be used.
-YOCTO_RELEASE     = thud
 
 # Docker settings
-DOCKER_IMAGE      = evologics/yocto
 DOCKER_WORK_DIR   = /work
 DOCKER_BIND       = -v $$(pwd):$(DOCKER_WORK_DIR) \
                     -v /etc/localtime:/etc/localtime:ro \
@@ -28,6 +34,13 @@ DOCKER_BIND       = -v $$(pwd):$(DOCKER_WORK_DIR) \
 
 ifneq ($(SSH_AUTH_SOCK),)
 	DOCKER_SSH_AUTH_SOCK = -v $(dir $(SSH_AUTH_SOCK)):$(dir $(SSH_AUTH_SOCK)) -e SSH_AUTH_SOCK=$(SSH_AUTH_SOCK)
+endif
+
+# Docker settings
+ifneq ($(USE_LOCAL_DOCKER_IMAGE),)
+	DOCKER_IMAGE := $(DOCKER_IMAGE)
+else
+	DOCKER_IMAGE := $(DOCKER_REGISTRY)/$(DOCKER_IMAGE)
 endif
 
 # Cmdline to run docker.
@@ -117,6 +130,13 @@ $(foreach line, $(addprefix url=, $(LAYERS)),                               \
 
 .PHONY: help
 help:
+	@echo Variables:
+	@echo 'USE_LOCAL_DOCKER_IMAGE=1  - Use local builded docker image. Disabled by default'
+	@echo
+	@echo YOCTO_RELEASE=$(YOCTO_RELEASE)
+	@echo DOCKER_REGISTRY=$(DOCKER_REGISTRY)
+	@echo DOCKER_IMAGE=$(DOCKER_IMAGE)
+	@echo
 	@echo 'List targets:'
 	@echo ' list-machine    - Show available machines'
 	@echo ' list-config     - Show available configs for a given machine'
@@ -137,7 +157,7 @@ help:
 	@echo 'Working with docker image:'
 	@echo ' image-build     - Build docker image'
 	@echo ' image-clean     - Remove docker image'
-	@echo ' image-check     - Checking exising docker image, and if not - build it'
+	@echo ' image-check     - Checking exising docker image, and if not - build or pull it'
 	@echo ''
 	@echo 'Generic targets:'
 	@echo ' all       - Download docker image, yocto and meta layers and build image $(IMAGE_NAME) for machine $(MACHINE)'
@@ -281,22 +301,46 @@ ipk-server: package-index
 		python3 -m http.server $(PORT) || \
 		python2 -m SimpleHTTPServer $(PORT)
 
-.PHONY: image-build image-clean image-deploy image-check
 image-build:
 	@cd docker && docker build -t $(DOCKER_IMAGE) .
+.PHONY: image-build
 
-image-clean:
-	@docker container ls | awk '"$(DOCKER_IMAGE)" == $$2{print $$1}' | xargs --no-run-if-empty docker container rm
-	@docker image ls | grep -qw '$(DOCKER_IMAGE)' && docker image rm $(DOCKER_IMAGE) || exit 0
+# help: check dockerd is running
+docker-check:
+	@docker ps > /dev/null
+.PHONY: docker-check
 
-image-check:
+# help: clean docker image and remove packed toolchains
+image-clean: docker-check
+	@docker container ls | awk '"$(DOCKER_IMAGE)$(suffix $@)" == $$1 && "$(YOCTO_RELEASE)" == $$2{print $$1":"$$2}' | \
+		xargs --no-run-if-empty docker container rm
+	@docker inspect --type=image $(DOCKER_IMAGE) > /dev/null 2>&1 && \
+		docker image rm $(DOCKER_IMAGE)$(suffix $@) || exit 0
+.PHONY: image-clean
+
+image-check: docker-check
+ifneq ($(USE_LOCAL_DOCKER_IMAGE),)
 	@if ! docker inspect $(DOCKER_IMAGE) > /dev/null 2>&1; then \
 		echo WARNING: docker image $(DOCKER_IMAGE) do not exist. Build one>&2; \
 		$(MAKE) image-build; \
 	fi
+else
+	@if ! docker inspect $(DOCKER_IMAGE) > /dev/null 2>&1; then \
+		echo WARNING: docker image $(DOCKER_IMAGE) do not exist. Pull one>&2; \
+		$(MAKE) image-pull; \
+	fi
+.PHONY: image-check
 
-image-deploy:
+# help: pull docker image from registry
+image-pull: docker-check registry-login
+	@docker pull $(DOCKER_IMAGE)
+.PHONY: image-pull
+
+# help: push docker image to registry
+image-push: docker-check registry-login
 	@docker push $(DOCKER_IMAGE)
+endif
+.PHONY: image-push
 
 # Naive implementation
 # Does not check for different image formats
@@ -315,4 +359,6 @@ ci-deploy:
 		|| cp -L deploy-images/zImage-$(MACHINE).bin $(CI_DEP_DIR) \
 		|| exit 1
 
-
+registry-login:
+	@docker login $(DOCKER_REGISTRY)
+.PHONY: registry-login
