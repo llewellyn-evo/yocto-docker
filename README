@@ -3,8 +3,19 @@ This project helps make build system for embedded platform by using
 docker (https://www.docker.com) and yocto (https://www.yoctoproject.org/)
 with distro poky (https://www.yoctoproject.org/tools-resources/projects/poky)
 
+=== Preparations ===
+
+$ sudo apt install git make docker.io tzdata
+$ sudo adduser $USER docker
+
+If you will not build docker image by own, but pull it from registry, then:
+
+$ sudo apt-get install golang-docker-credential-helpers xauth dbus-x11
+$ mkdir -p ~/.docker
+$ echo '{ "credsStore": "secretservice" }' >  ~/.docker/config.json
+
 === Quick Start ===
-This will setup docker image 'crops/poky', download yocto and meta layers,
+This will setup docker image 'evologics/yocto', download yocto and meta layers,
 setup local config and run building image 'core-image-minimal' and sdk for
 machine 'sama5d2-roadrunner-evo'.
 
