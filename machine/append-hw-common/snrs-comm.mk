@@ -1,6 +1,6 @@
 include machine/append-sw-common/qemu-target.mk
 
-LAYERS += $(SOURCES_DIR)/meta-evo-private
+LAYERS += git@gitlab.evologics.de:bsp/meta-evo-private.git
 
 LOCAL_CONF_OPT += 'INHERIT += " userconfig"'
 
