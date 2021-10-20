@@ -4,11 +4,8 @@ IMAGE_NAME        = core-image-minimal
 # MACHINE is a must in local.conf
 LOCAL_CONF_OPT    = 'MACHINE = "$(MACHINE)"'
 
-# Start recording variables which will go to the local.conf file
-# If you want do redefine the variable VAR previously set, first use:
-#undefine VAR
-# Otherwise it will not be recorded and will not show up in local.conf
-OLDVARS := $(sort $(.VARIABLES))
+################ begin build/conf/local.conf options ###################
+$(call local_conf_options_begin)
 
 # Define what we need
 PACKAGE_CLASSES             = package_ipk
@@ -44,12 +41,8 @@ EXTRA_IMAGE_FEATURES_append = package-management read-only-rootfs
 
 BBMASK_append               = .*at91.*
 
-# Actually add recorded variables to LOCAL_CONF_OPT
-NEWVARS := $(sort $(.VARIABLES))
-$(call add_to_local_conf_opt)
-
-# Build dir
-BUILD_DIR         = build
+$(call local_conf_options_end)
+################ end build/conf/local.conf options #####################
 
 # If layer branch not set with "branch=" option, YOCTO_RELEASE will be used.
 # If layer has no such branch, 'master' branch will be used.
