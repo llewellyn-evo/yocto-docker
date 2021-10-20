@@ -46,15 +46,11 @@ LOCAL_CONF_OPT   += 'IMAGE_ROOTFS_EXTRA_SPACE = "100000"'
 LOCAL_CONF_OPT   += 'PACKAGE_CLASSES = "package_ipk"'
 
 LOCAL_CONF_OPT   += 'TCLIBC = "glibc"'
+################ begin build/conf/local.conf options ###################
+$(call local_conf_options_begin)
 
-
-# Actually add recorded variables to LOCAL_CONF_OPT
-NEWVARS := $(sort $(.VARIABLES))
-
-$(call add_to_local_conf_opt)
-
-# Build dir
-BUILD_DIR         = build
+$(call local_conf_options_end)
+################ end build/conf/local.conf options #####################
 
 # If layer branch not set with "branch=" option, YOCTO_RELEASE will be used.
 # If layer has no such branch, 'master' branch will be used.
