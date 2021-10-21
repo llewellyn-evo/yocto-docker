@@ -6,4 +6,4 @@ LOCAL_CONF_OPT += 'EVOSN = "1"'
 
 LOCAL_CONF_OPT += 'HW_REVISION = "2.0"'
 
-LOCAL_CONF_OPT += 'IMAGE_CONFIGS = " atmclkpps"'
+LOCAL_CONF_OPT += 'IMAGE_CONFIGS = " can enablesw atmclkpps"'
