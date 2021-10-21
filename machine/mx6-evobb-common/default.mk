@@ -36,7 +36,6 @@ CORE_IMAGE_EXTRA_INSTALL   += evo-envinit
 #CORE_IMAGE_EXTRA_INSTALL  += openssh-client keychain
 #CORE_IMAGE_EXTRA_INSTALL  += ntp kernel-module-pps-gpio
 
-PREFERRED_PROVIDER_virtual/kernel = linux-toradex
 PRSERV_HOST = localhost:0
 
 DISTRO_FEATURES_remove = bluetooth
@@ -64,7 +63,7 @@ YOCTO_RELEASE     = thud
 LAYERS           += \
                     git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-python,meta-networking,meta-filesystems \
                     https://git.yoctoproject.org/git/meta-freescale \
-                    https://github.com/evologics/meta-freescale-3rdparty \
+                    https://github.com/Freescale/meta-freescale-3rdparty \
                     https://github.com/sbabic/meta-swupdate \
                     git://git.toradex.com/meta-toradex-bsp-common.git \
                     git://git.toradex.com/meta-toradex-nxp.git \
