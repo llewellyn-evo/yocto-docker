@@ -1,6 +1,7 @@
 # Erlang OTP21
 LOCAL_CONF_OPT += 'PREFERRED_VERSION_erlang = "21.1%"'
 LOCAL_CONF_OPT += 'PREFERRED_VERSION_erlang-native = "21.1%"'
+LOCAL_CONF_OPT += 'PACKAGECONFIG_pn-nodejs-native = "ares brotli zlib"'
 
 # SiNAPS lives in meta-evo-private
 LAYERS += $(SOURCES_DIR)/meta-evo-private
