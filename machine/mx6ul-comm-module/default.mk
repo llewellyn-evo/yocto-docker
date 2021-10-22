@@ -77,7 +77,7 @@ LAYERS	+= https://git.phytec.de/meta-yogurt;patches=0001-remove-dependency-qt5-r
 
 LAYERS	+= https://github.com/sbabic/meta-swupdate
 
-LAYERS	+= https://github.com/meta-erlang/meta-erlang.git;branch=zeus
+LAYERS	+= https://github.com/meta-erlang/meta-erlang.git;branch=zeus;patches=0001-Enable-PARALLEL_MAKE.patch
 
 
 MACHINE_BITBAKE_TARGETS = meta-toolchain swupdate-images-evo-comm
