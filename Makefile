@@ -102,7 +102,7 @@ comma := ,
 #undefine VAR
 # Otherwise it will not be recorded and will not show up in local.conf
 define local_conf_options_begin
-    __VARIABLES_OLD =: $(sort $(.VARIABLES))
+    $(eval __VARIABLES_OLD := $(sort $(.VARIABLES)))
 endef
 
 define local_conf_options_set
@@ -116,11 +116,11 @@ endef
 define local_conf_options_end
 	$(if $(__VARIABLES_OLD), \
 		$(foreach v, $(sort $(.VARIABLES)), \
-			$(if $(filter-out __VARIABLES_OLD $(__VARIABLES_OLD), $(v)), \
+			$(if $(filter-out __VARIABLES_OLD $(__VARIABLES_OLD),$(v)), \
 				$(call local_conf_options_set,$(v),$($v)) \
 			) \
 		)
-		undefine __VARIABLES_OLD
+		$(eval undefine __VARIABLES_OLD)
 	,)
 endef
 ################### end helpers ###########################
