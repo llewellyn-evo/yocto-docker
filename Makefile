@@ -1,5 +1,7 @@
-# Docker/Yocto Build System Setup
-#     by komar@evologics.de 2018-2019 Evologics GmbH
+# Yocto/Docker Build System Setup
+#     by komar@evologics.de 2018-2021 Evologics GmbH
+#     by viktor.voronin@evologics.de Evologics GmbH
+#     by llewellyn.fernandes@evologics.de Evologics GmbH
 # This project helps make build system for embedded platform by using docker and yocto.
 #
 # TODO: add Makefile to build-* directory, to call ../Makefile. which detected
