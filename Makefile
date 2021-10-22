@@ -16,7 +16,7 @@ YOCTO_RELEASE     = thud
 DOCKER_REGISTRY   = docker.evologics.de
 DOCKER_IMAGE      = evologics/yocto:$(YOCTO_RELEASE)
 
-SSTATE_CACHE_DIR := share/$(YOCTO_RELEASE)/$(MACHINE)/sstate-cache
+SSTATE_CACHE_DIR  = share/$(YOCTO_RELEASE)/$(MACHINE)/sstate-cache
 ################### begin build enviroment variable #########################
 # Change this if you have shared 'downloads' directory for yocto
 LOCAL_CONF_OPT_DL_DIR = $$$${TOPDIR}/../share/downloads
