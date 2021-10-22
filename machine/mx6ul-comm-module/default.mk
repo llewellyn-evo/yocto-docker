@@ -9,6 +9,10 @@ LOCAL_CONF_OPT    += 'DISTRO  = "yogurt"'
 LOCAL_CONF_OPT += 'BBMASK            += ".*karo.*"'
 LOCAL_CONF_OPT += 'BBMASK            += ".*toradex.*"'
 LOCAL_CONF_OPT += 'BBMASK            += ".*at91.*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*rauc.*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*meta-yogurt/recipes-qt/*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*meta-yogurt/recipes-images/*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*meta-yogurt/recipes-examples/*"'
 
 # Start recording variables which will go to te local.conf file
 # If you want do redefine the variable VAR previously set, first use:
@@ -62,15 +66,19 @@ YOCTO_RELEASE     = thud
 # Possible options:
 # 	* branch=<branch-to-clone>
 # 	* subdirs=<subdirectory with meta-layer>[,<subdirectory with meta-layer>]
-LAYERS           += https://github.com/EvoLogics/meta-evo.git  				   				\
-                    git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-python,meta-networking,meta-filesystems,meta-initramfs,meta-multimedia,meta-perl,meta-webserver,\
-                    https://git.phytec.de/meta-phytec 									\
-                    https://git.phytec.de/meta-yogurt 									\
-                    https://github.com/OSSystems/meta-gstreamer1.0.git 							\
-                    https://github.com/meta-qt5/meta-qt5.git 								\
-                    https://github.com/rauc/meta-rauc.git 								\
-                    https://github.com/sbabic/meta-swupdate								\
-                    https://github.com/meta-erlang/meta-erlang.git;branch=zeus
+
+LAYERS	+= https://github.com/EvoLogics/meta-evo.git
+
+LAYERS	+= git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-python,meta-networking,meta-filesystems,meta-initramfs,meta-multimedia,meta-perl,meta-webserver
+
+LAYERS 	+= https://git.phytec.de/meta-phytec
+
+LAYERS	+= https://git.phytec.de/meta-yogurt;patches=0001-remove-dependency-qt5-rauc.patch
+
+LAYERS	+= https://github.com/sbabic/meta-swupdate
+
+LAYERS	+= https://github.com/meta-erlang/meta-erlang.git;branch=zeus
+
 
 MACHINE_BITBAKE_TARGETS = meta-toolchain swupdate-images-evo-comm
 
