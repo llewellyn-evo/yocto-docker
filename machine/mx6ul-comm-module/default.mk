@@ -10,9 +10,9 @@ LOCAL_CONF_OPT += 'BBMASK            += ".*karo.*"'
 LOCAL_CONF_OPT += 'BBMASK            += ".*toradex.*"'
 LOCAL_CONF_OPT += 'BBMASK            += ".*at91.*"'
 LOCAL_CONF_OPT += 'BBMASK            += ".*rauc.*"'
-LOCAL_CONF_OPT += 'BBMASK            += ".*meta-yogurt/recipes-qt/*"'
-LOCAL_CONF_OPT += 'BBMASK            += ".*meta-yogurt/recipes-images/*"'
-LOCAL_CONF_OPT += 'BBMASK            += ".*meta-yogurt/recipes-examples/*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*meta-yogurt/recipes-qt/.*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*meta-yogurt/recipes-images/.*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*meta-yogurt/recipes-examples/.*"'
 
 # Start recording variables which will go to te local.conf file
 # If you want do redefine the variable VAR previously set, first use:
