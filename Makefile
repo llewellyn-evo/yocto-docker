@@ -181,11 +181,16 @@ $(foreach line, $(addprefix url=, $(LAYERS)),                               \
         ,                                                                   \
             $(eval LAYERS_DIR += $(dir))                                    \
         )                                                                   \
+        $(if $(value LAYER_$(name)_patches),                                \
+            $(eval LAYER_$(name)_patches :=                                 \
+                $(addprefix $(PROJ_TOP_DIR)/patches/$(name)/,               \
+                    $(subst $(comma),  ,$(LAYER_$(name)_patches)))),        \
+        )                                                                   \
  )
 
 # Put LOCAL_CONF_OPT_* to LOCAL_CONF_OPT
 $(foreach v, $(filter LOCAL_CONF_OPT_%,$(.VARIABLES)),\
-	$(call local_conf_options_set,$(subst LOCAL_CONF_OPT_,,$(v)),$($v)) \
+    $(call local_conf_options_set,$(subst LOCAL_CONF_OPT_,,$(v)),$($v)) \
 )
 
 .PHONY: help
@@ -317,7 +322,7 @@ $(call uniq,$(LAYERS_DIR)):
 	fi
 	@if [ -n "$(LAYER_$(@F)_patches)" ]; then     \
 		cd $(PROJ_TOP_DIR)/$(SOURCES_DIR)/$(@F); \
-		git am $(PROJ_TOP_DIR)/patches/$(@F)/$(LAYER_$(@F)_patches); \
+		git am $(LAYER_$(@F)_patches); \
 	fi
 
 $(BUILD_DIR):
