@@ -26,6 +26,10 @@ OLDVARS := $(sort $(.VARIABLES))
 LOCAL_CONF_OPT    += 'KCONFIG_CONFIG_COMMAND = "nconfig"'
 LOCAL_CONF_OPT    += 'KCONFIG_CONFIG_COMMAND_pn-busybox = "menuconfig"'
 
+# Remove prefered version for nodejs-native,nodejs - declared in meta-yogurt
+LOCAL_CONF_OPT    += 'PREFERRED_VERSION_nodejs_remove = "8.%"'
+LOCAL_CONF_OPT    += 'PREFERRED_VERSION_nodejs-native_remove = "8.%"'
+
 # Must have for the platform
 LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " rng-tools iproute2 coreutils grep bridge-utils iputils iperf3 net-tools"'
 # Very useful software
