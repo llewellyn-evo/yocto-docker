@@ -76,4 +76,4 @@ fi
 [ -z "$2" ] && [ -t 0 ] && \
     echo -e "\e[32mTip: use '$0 ${machine} ${machine_config}' for non-interactive mode.\e[0m"
 
-make MACHINE=${machine} MACHINE_CONFIG=${machine_config} configure
+make MACHINE=${machine} MACHINE_CONFIG=${machine_config} clean-links configure

@@ -193,7 +193,6 @@ $(foreach v, $(filter LOCAL_CONF_OPT_%,$(.VARIABLES)),\
     $(call local_conf_options_set,$(subst LOCAL_CONF_OPT_,,$(v)),$($v)) \
 )
 
-.PHONY: help
 help:
 	@echo Variables:
 	@echo 'USE_LOCAL_DOCKER_IMAGE=1  - Use local builded docker image. Disabled by default'
@@ -282,6 +281,7 @@ help:
 	@echo ''
 	@echo 'Finish working on a recipe in workspace (update-recipe + reset)'
 	@echo 'docker$$ devtool finish linux-at91 /work/sources/meta-evo'
+.PHONY: help
 
 .build-host-config.mk:
 	@test -t 1 && echo Creating config .build-host-config.mk
@@ -291,20 +291,23 @@ help:
 	@echo 'LOCAL_CONF_OPT_BB_NUMBER_THREADS ?= $(LOCAL_CONF_OPT_BB_NUMBER_THREADS)' >> .build-host-config.mk
 	@echo 'LOCAL_CONF_OPT_PARALLEL_MAKE     ?= $(LOCAL_CONF_OPT_PARALLEL_MAKE)'     >> .build-host-config.mk
 
-.PHONY: list-machine list-config configure ci-deploy
 list-machine:
 	@ls -1 machine/ | grep -v common | sed '/$(MACHINE)[-.]/! s/\b$(MACHINE)\b/ * &/g'
+.PHONY: list-machine
 
 list-config:
 	@echo " * $(MACHINE):"
 	@ls -1 machine/$(MACHINE)/ | grep .mk | sed 's/.mk\b//g' | sed '/$(MACHINE_CONFIG)[-.]/! s/\b$(MACHINE_CONFIG)\b/ * &/g'
+.PHONY: list-config
 
 all: image-check $(PROJ_TOP_DIR)/$(SOURCES_DIR) $(LAYERS_DIR) $(BUILD_DIR) configure $(TARGET_ALL_DEPEND)
 	@$(TIME) $(DOCKER_RUN) "bitbake $(IMAGE_NAME) $(MACHINE_BITBAKE_TARGETS)"
 	@echo 'Result binaries and images you can find at $(BUILD_DIR)/tmp/deploy/'
+.PHONY: all
 
 devshell: image-check $(PROJ_TOP_DIR)/$(SOURCES_DIR) $(LAYERS_DIR) $(BUILD_DIR) configure
 	@$(DOCKER_RUN) $(CMD)
+.PHONY: devshell
 
 $(PROJ_TOP_DIR)/$(SOURCES_DIR):
 	@$(GIT_CLONE) -b $(YOCTO_RELEASE) git://git.yoctoproject.org/poky.git $(PROJ_TOP_DIR)/$(SOURCES_DIR)
@@ -327,7 +330,6 @@ $(call uniq,$(LAYERS_DIR)):
 
 $(BUILD_DIR):
 	@mkdir -p $(BUILD_DIR)
-	@ln -sfT $(BUILD_DIR) build
 
 ifneq ($(CREATE_USEFULL_SYMLINKS),)
     SYMLINK_TO_DIR_images = build/tmp/deploy/images/$(MACHINE)
@@ -352,21 +354,23 @@ LOCAL_CONF_MARK = \#=== This block automatically generated. Do not change nothin
 # which is called every run from container entrypoint script
 $(BUILD_DIR)/conf/local.conf: $(PROJ_TOP_DIR)/$(SOURCES_DIR) $(LAYERS_DIR) $(BUILD_DIR) $(USEFULL_SYMLINKS)
 	@echo Update $(BUILD_DIR)/conf/local.conf
-	@$(DOCKER_RUN) "bitbake-layers add-layer $(addprefix $(DOCKER_WORK_DIR)/,$(LAYERS_DIR))"
+	@ln -sfT $(BUILD_DIR) build
 	@sed -i '/$(LOCAL_CONF_MARK)/,/$(LOCAL_CONF_MARK)/d' $(BUILD_DIR)/conf/local.conf
 	@echo '$(LOCAL_CONF_MARK)'                        >> $(BUILD_DIR)/conf/local.conf
 	@printf "%s\n" $(LOCAL_CONF_OPT)                  >> $(BUILD_DIR)/conf/local.conf
 	@echo '$(LOCAL_CONF_MARK)'                        >> $(BUILD_DIR)/conf/local.conf
+	@$(DOCKER_RUN) "bitbake-layers add-layer $(addprefix $(DOCKER_WORK_DIR)/,$(LAYERS_DIR))"
 
 	@echo Update .config.mk
 	@echo "MACHINE ?= $(MACHINE)" > .config.mk
 	@echo "MACHINE_CONFIG ?= $(MACHINE_CONFIG)" >> .config.mk
 
-.PHONY: add-layer remove-layer clean-bbconfigs clean-deploy cleanall package-index ipk-server
+
 add-layer: configure $(LAYERS_DIR)
 	@for LAYER in $(LAYERS_DIR); do \
 	$(DOCKER_RUN) "bitbake-layers add-layer $(DOCKER_WORK_DIR)/$$LAYER"; \
 	done
+.PHONY: add-layer
 
 remove-layer: configure
 	@echo "REMOVING: $(LAYERS_DIR)"
@@ -387,21 +391,31 @@ remove-layer: configure
 	    $(DOCKER_RUN) "bitbake-layers remove-layer $(DOCKER_WORK_DIR)/$$LAYER && \
 			rm -rf $(PROJ_TOP_DIR)/$$LAYER"; \
 	done
+.PHONY: remove-layers
 
-clean-bbconfigs:
-	rm -f $(BUILD_DIR)/conf/local.conf $(BUILD_DIR)/conf/bblayers.conf deploy-images $(USEFULL_SYMLINKS)
+clean-bbconfigs: clean-links
+	rm -f $(BUILD_DIR)/conf/local.conf $(BUILD_DIR)/conf/bblayers.conf deploy-images
+.PHONY: clean-bbconfigs
+
+clean-links:
+	@rm -f build $(USEFULL_SYMLINKS)
+.PHONY: clean-links
 
 clean-deploy:
 	rm -rf $(BUILD_DIR)/tmp/deploy
+.PHONY: clean-deploy
 
 cleanall:
 	rm -rf $(BUILD_DIR)/tmp $(PROJ_TOP_DIR)/share/$(YOCTO_RELEASE)/$(MACHINE)/sstate-cache
+.PHONY: cleanall
 
-distclean:
-	rm -rf $(BUILD_DIR) $(PROJ_TOP_DIR)/$(SOURCES_DIR) .config.mk $(USEFULL_SYMLINKS)
+distclean: clean-links
+	rm -rf $(BUILD_DIR) $(PROJ_TOP_DIR)/$(SOURCES_DIR) .config.mk
+.PHONY: distclean
 
 package-index:
 	@$(DOCKER_RUN) bitbake package-index
+.PHONY: package-index
 
 ipk-server: package-index
 	$(eval IP := $(shell ip a | sed -n '/dynamic/s/.*inet \([^/]*\).*/\1/p;T;q'))
@@ -425,6 +439,7 @@ ipk-server: package-index
 	@cd $(BUILD_DIR)/tmp/deploy/; \
 		python3 -m http.server $(PORT) || \
 		python2 -m SimpleHTTPServer $(PORT)
+.PHONY: ipk-server
 
 image-build:
 	@cd docker && docker build -t $(DOCKER_IMAGE) .
@@ -483,6 +498,7 @@ ci-deploy:
 	cp -L deploy-images/uImage-$(MACHINE).bin $(CI_DEP_DIR) \
 		|| cp -L deploy-images/zImage-$(MACHINE).bin $(CI_DEP_DIR) \
 		|| exit 1
+.PHONY: ci-deploy
 
 registry-login:
 	@docker login $(DOCKER_REGISTRY)
