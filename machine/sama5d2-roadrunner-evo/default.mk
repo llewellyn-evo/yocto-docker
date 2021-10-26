@@ -2,23 +2,31 @@
 IMAGE_NAME        = evologics-base-image
 
 # Options to append into local.conf
+# NOTE: MACHINE cannot be added in local_conf_options_* section
+#       MACHINE already exist in Makefile variables
 LOCAL_CONF_OPT  = 'MACHINE            = "$(MACHINE)"'
-LOCAL_CONF_OPT += 'PACKAGE_CLASSES    = "package_ipk"'
-LOCAL_CONF_OPT += 'DISTRO             = "poky-evo"'
-LOCAL_CONF_OPT += 'TCLIBC             = "musl"'
-LOCAL_CONF_OPT += 'BBMASK            += ".*karo.*"'
-LOCAL_CONF_OPT += 'BBMASK            += ".*toradex.*"'
-LOCAL_CONF_OPT += 'BBMASK            += ".*linux-fslc.*"'
-LOCAL_CONF_OPT += 'BBMASK            += ".*barebox.*"'
-LOCAL_CONF_OPT += 'BBMASK            += ".*-phy[0-9].*"'
-LOCAL_CONF_OPT += 'BBMASK            += ".*-phy[0-9].*"'
-LOCAL_CONF_OPT += 'BBMASK            += ".*systemd-machine-units.bb.*"'
-LOCAL_CONF_OPT += 'BBMASK            += ".*meta-virtualization/recipes-core/busybox/busybox.*"'
 
-# did't work
-#LOCAL_CONF_OPT += 'PARALLEL_MAKE_erlang="-j 8"'
-#LOCAL_CONF_OPT += 'PARALLEL_MAKE_erlang-native="-j 8"'
-#LOCAL_CONF_OPT += 'PARALLEL_MAKE_nativesdk-erlang="-j 8"'
+################ begin build/conf/local.conf options ###################
+$(call local_conf_options_begin)
+
+PACKAGE_CLASSES = package_ipk
+DISTRO          = poky-evo
+TCLIBC          = musl
+
+BBMASK         += .*karo.*
+BBMASK         += .*toradex.*
+BBMASK         += .*linux-fslc.*
+BBMASK         += .*barebox.*
+BBMASK         += .*-phy[0-9].*
+BBMASK         += .*-phy[0-9].*
+BBMASK         += .*systemd-machine-units.bb.*
+BBMASK         += .*meta-virtualization/recipes-core/busybox/busybox.*
+
+FORTRAN_forcevariable = ,fortran
+RUNTIMETARGET_append_pn-gcc-runtime = libquadmath
+
+$(call local_conf_options_end)
+################ end build/conf/local.conf options #####################
 
 # If layer branch not set with "branch=" option, YOCTO_RELEASE will be used.
 # If layer has no such branch, 'master' branch will be used.
