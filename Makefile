@@ -193,6 +193,8 @@ $(foreach v, $(filter LOCAL_CONF_OPT_%,$(.VARIABLES)),\
     $(call local_conf_options_set,$(subst LOCAL_CONF_OPT_,,$(v)),$($v)) \
 )
 
+# help-section: Generic targets
+# help: Show help
 help:
 	@echo Variables:
 	@echo 'USE_LOCAL_DOCKER_IMAGE=1  - Use local builded docker image. Disabled by default'
@@ -207,34 +209,11 @@ help:
 	@echo YOCTO_RELEASE=$(YOCTO_RELEASE)
 	@echo DOCKER_REGISTRY=$(DOCKER_REGISTRY)
 	@echo DOCKER_IMAGE=$(DOCKER_IMAGE)
-	@echo
-	@echo 'List targets:'
-	@echo ' list-machine    - Show available machines'
-	@echo ' list-config     - Show available configs for a given machine'
-	@echo ''
-	@echo 'Cleaning targets:'
-	@echo ' distclean       - Remove all generated files and directories'
-	@echo ' cleanall        - Remove all generated files and directories in build directory'
-	@echo ' clean-bbconfigs - Remove bblayers.conf and local.conf files'
-	@echo ' clean-deploy    - Remove resulting target images and packages'
-	@echo ''
-	@echo 'Add/remove layers:'
-	@echo ' add-layer       - Add one or multiple layers'
-	@echo ' remove-layer    - Remove one or multiple layers. Necessary parameter: LAYERS="<layer1> <layer2>"'
-	@echo '                   WARNING: by default will be removed all layers. Dirty repo will be not removed'
-	@echo ''
-	@echo 'Working with repository:'
-	@echo ' package-index   - Rebuild package index of repository. This is needed after package adding/removing'
-	@echo ' ipk-server      - Start webserver for repository sharing. Package index will be rebuilded also'
-	@echo ''
-	@echo 'Working with docker image:'
-	@echo ' image-build     - Build docker image'
-	@echo ' image-clean     - Remove docker image'
-	@echo ' image-check     - Checking exising docker image, and if not - build or pull it'
-	@echo ''
-	@echo 'Generic targets:'
-	@echo ' all       - Download docker image, yocto and meta layers and build image $(IMAGE_NAME) for machine $(MACHINE)'
-	@echo ' devshell  - Invoke developer shell. Can run command in CMD variable'
+	@# Parse Makefile to find "help-section: " and "help: " tockens, and show them
+	@sed -n -e 's/^# help-section: \(.*\)/printf "\n### %s\n" "\1"/p;t' \
+		-e 's/^# help: \(.*\)/\1/;t z' -e b -e ':z' \
+			-e 'N;s/\(.*\)\n\([^:]*\):.*/printf "%-20s - %s\\n" "\2" "\1"/p' \
+				$(firstword $(MAKEFILE_LIST)) | sh
 	@echo ''
 	@echo 'Also docker can be run directly:'
 	@echo '$$ $(DOCKER_RUN)'
@@ -291,20 +270,13 @@ help:
 	@echo 'LOCAL_CONF_OPT_BB_NUMBER_THREADS ?= $(LOCAL_CONF_OPT_BB_NUMBER_THREADS)' >> .build-host-config.mk
 	@echo 'LOCAL_CONF_OPT_PARALLEL_MAKE     ?= $(LOCAL_CONF_OPT_PARALLEL_MAKE)'     >> .build-host-config.mk
 
-list-machine:
-	@ls -1 machine/ | grep -v common | sed '/$(MACHINE)[-.]/! s/\b$(MACHINE)\b/ * &/g'
-.PHONY: list-machine
-
-list-config:
-	@echo " * $(MACHINE):"
-	@ls -1 machine/$(MACHINE)/ | grep .mk | sed 's/.mk\b//g' | sed '/$(MACHINE_CONFIG)[-.]/! s/\b$(MACHINE_CONFIG)\b/ * &/g'
-.PHONY: list-config
-
+# help: Download docker image, yocto and meta layers and build image \$(IMAGE_NAME) for machine \$(MACHINE)
 all: image-check $(PROJ_TOP_DIR)/$(SOURCES_DIR) $(LAYERS_DIR) $(BUILD_DIR) configure $(TARGET_ALL_DEPEND)
 	@$(TIME) $(DOCKER_RUN) "bitbake $(IMAGE_NAME) $(MACHINE_BITBAKE_TARGETS)"
 	@echo 'Result binaries and images you can find at $(BUILD_DIR)/tmp/deploy/'
 .PHONY: all
 
+# help: Invoke developer shell. Can run command in CMD variable
 devshell: image-check $(PROJ_TOP_DIR)/$(SOURCES_DIR) $(LAYERS_DIR) $(BUILD_DIR) configure
 	@$(DOCKER_RUN) $(CMD)
 .PHONY: devshell
@@ -347,6 +319,7 @@ $(USEFULL_SYMLINKS):
 
 endif
 
+# help: Configure build system
 configure: $(BUILD_DIR)/conf/local.conf
 
 LOCAL_CONF_MARK = \#=== This block automatically generated. Do not change nothing there ===
@@ -365,13 +338,28 @@ $(BUILD_DIR)/conf/local.conf: $(PROJ_TOP_DIR)/$(SOURCES_DIR) $(LAYERS_DIR) $(BUI
 	@echo "MACHINE ?= $(MACHINE)" > .config.mk
 	@echo "MACHINE_CONFIG ?= $(MACHINE_CONFIG)" >> .config.mk
 
+# help-section: List targets
+# help: Show available machines
+list-machine:
+	@ls -1 machine/ | grep -v common | sed '/$(MACHINE)[-.]/! s/\b$(MACHINE)\b/ * &/g'
+.PHONY: list-machine
 
+# help: Show available configs for a given machine
+list-config:
+	@echo " * $(MACHINE):"
+	@ls -1 machine/$(MACHINE)/ | grep .mk | sed 's/.mk\b//g' | sed '/$(MACHINE_CONFIG)[-.]/! s/\b$(MACHINE_CONFIG)\b/ * &/g'
+.PHONY: list-config
+
+# help-section: Layers manipulation targets
+# help: Add one or multiple layers
 add-layer: configure $(LAYERS_DIR)
 	@for LAYER in $(LAYERS_DIR); do \
 	$(DOCKER_RUN) "bitbake-layers add-layer $(DOCKER_WORK_DIR)/$$LAYER"; \
 	done
 .PHONY: add-layer
 
+# WARNING: by default will be removed all layers. Dirty repo will be not removed'
+# help: Remove one or multiple layers. Necessary parameter: LAYERS='layer1 layer2'
 remove-layer: configure
 	@echo "REMOVING: $(LAYERS_DIR)"
 	@for LAYER in $(LAYERS_DIR); do \
@@ -393,30 +381,38 @@ remove-layer: configure
 	done
 .PHONY: remove-layers
 
+# help: Remove bblayers.conf and local.conf files
 clean-bbconfigs: clean-links
 	rm -f $(BUILD_DIR)/conf/local.conf $(BUILD_DIR)/conf/bblayers.conf deploy-images
 .PHONY: clean-bbconfigs
 
+# help: Remove useful symbolic links
 clean-links:
 	@rm -f build $(USEFULL_SYMLINKS)
 .PHONY: clean-links
 
+# help: Remove resulting target images and packages
 clean-deploy:
 	rm -rf $(BUILD_DIR)/tmp/deploy
 .PHONY: clean-deploy
 
+# help: Remove sstate-cache, all generated files and directories in build directory
 cleanall:
 	rm -rf $(BUILD_DIR)/tmp $(PROJ_TOP_DIR)/share/$(YOCTO_RELEASE)/$(MACHINE)/sstate-cache
 .PHONY: cleanall
 
+# help: Remove build, source directory and .config.mk
 distclean: clean-links
 	rm -rf $(BUILD_DIR) $(PROJ_TOP_DIR)/$(SOURCES_DIR) .config.mk
 .PHONY: distclean
 
+# help-section Working with repository
+# help: Rebuild package index of repository. This is needed after package adding/removing'
 package-index:
 	@$(DOCKER_RUN) bitbake package-index
 .PHONY: package-index
 
+#help: Start webserver for repository sharing. Package index will be rebuilded also
 ipk-server: package-index
 	$(eval IP := $(shell ip a | sed -n '/dynamic/s/.*inet \([^/]*\).*/\1/p;T;q'))
 	$(eval PORT := 8080)
@@ -441,16 +437,13 @@ ipk-server: package-index
 		python2 -m SimpleHTTPServer $(PORT)
 .PHONY: ipk-server
 
+# help-section: Working with docker image
+# help: Build docker image
 image-build:
 	@cd docker && docker build -t $(DOCKER_IMAGE) .
 .PHONY: image-build
 
-# help: check dockerd is running
-docker-check:
-	@docker ps > /dev/null
-.PHONY: docker-check
-
-# help: clean docker image and remove packed toolchains
+# help: Clean docker image and containers
 image-clean: docker-check
 	@docker container ls | awk '"$(DOCKER_IMAGE)$(suffix $@)" == $$1 && "$(YOCTO_RELEASE)" == $$2{print $$1":"$$2}' | \
 		xargs --no-run-if-empty docker container rm
@@ -458,6 +451,7 @@ image-clean: docker-check
 		docker image rm $(DOCKER_IMAGE)$(suffix $@) || exit 0
 .PHONY: image-clean
 
+# help: Checking exising docker image, and if not - build or pull it
 image-check: docker-check
 ifneq ($(USE_LOCAL_DOCKER_IMAGE),)
 	@if ! docker inspect $(DOCKER_IMAGE) > /dev/null 2>&1; then \
@@ -471,16 +465,21 @@ else
 	fi
 .PHONY: image-check
 
-# help: pull docker image from registry
+# help: Pull docker image from registry
 image-pull: docker-check registry-login
 	@docker pull $(DOCKER_IMAGE)
 .PHONY: image-pull
 
-# help: push docker image to registry
+# help: Push docker image to registry
 image-push: docker-check registry-login
 	@docker push $(DOCKER_IMAGE)
 endif
 .PHONY: image-push
+
+# help: Check if dockerd is running
+docker-check:
+	@docker ps > /dev/null
+.PHONY: docker-check
 
 # Naive implementation
 # Does not check for different image formats
@@ -500,6 +499,7 @@ ci-deploy:
 		|| exit 1
 .PHONY: ci-deploy
 
+# help: Login to \$(DOCKER_REGISTRY) registry
 registry-login:
 	@docker login $(DOCKER_REGISTRY)
 .PHONY: registry-login
