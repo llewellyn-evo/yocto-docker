@@ -326,8 +326,12 @@ LOCAL_CONF_MARK = \#=== This block automatically generated. Do not change nothin
 # Build directory is created by oe-init-build-env script,
 # which is called every run from container entrypoint script
 $(BUILD_DIR)/conf/local.conf: $(PROJ_TOP_DIR)/$(SOURCES_DIR) $(LAYERS_DIR) $(BUILD_DIR) $(USEFULL_SYMLINKS)
-	@echo Update $(BUILD_DIR)/conf/local.conf
+	@#Update symlink to build directory, in case it was changed by lazyconf
 	@ln -sfT $(BUILD_DIR) build
+
+	@# if local.conf do not exist, it will be created by oe-init-build-env in docker/entrypoint.sh
+	@[ -f $(BUILD_DIR)/conf/local.conf ] && echo Update $@ || $(DOCKER_RUN) "echo Create $@"
+
 	@sed -i '/$(LOCAL_CONF_MARK)/,/$(LOCAL_CONF_MARK)/d' $(BUILD_DIR)/conf/local.conf
 	@echo '$(LOCAL_CONF_MARK)'                        >> $(BUILD_DIR)/conf/local.conf
 	@printf "%s\n" $(LOCAL_CONF_OPT)                  >> $(BUILD_DIR)/conf/local.conf
