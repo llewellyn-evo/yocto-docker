@@ -1,0 +1,25 @@
+From 5fd76b4b53d24a9b111b34a5a25e5a12d4f7878a Mon Sep 17 00:00:00 2001
+From: Maksym Komar <komar@evologics.de>
+Date: Fri, 15 Oct 2021 13:30:14 +0200
+Subject: [PATCH] Enable PARALLEL_MAKE
+
+---
+ recipes-devtools/erlang/erlang.inc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/recipes-devtools/erlang/erlang.inc b/recipes-devtools/erlang/erlang.inc
+index e6c2f58..ca71d2b 100644
+--- a/recipes-devtools/erlang/erlang.inc
++++ b/recipes-devtools/erlang/erlang.inc
+@@ -14,7 +14,7 @@ SRC_URI += "file://erlang-fix-build-issue-in-Yocto.patch"
+ 
+ S = "${WORKDIR}/git"
+ 
+-PARALLEL_MAKE = ""
++#PARALLEL_MAKE = ""
+ 
+ inherit autotools-brokensep
+ 
+-- 
+2.30.2
+
