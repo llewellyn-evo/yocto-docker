@@ -1,20 +1,54 @@
-# Docker/Yocto Build System Setup
-#     by komar@evologics.de 2018-2019 Evologics GmbH
+# Yocto/Docker Build System Setup
+#     by komar@evologics.de 2018-2021 Evologics GmbH
+#     by viktor.voronin@evologics.de Evologics GmbH
+#     by llewellyn.fernandes@evologics.de Evologics GmbH
 # This project helps make build system for embedded platform by using docker and yocto.
 #
 # TODO: add Makefile to build-* directory, to call ../Makefile. which detected
 # if make runned inside docker, call same commands with bitbake, but without docker
 
+# Uncomment this if you want use local builded docker image
+#USE_LOCAL_DOCKER_IMAGE=1
+
+# Comment this if you don't want create symlinks in project root directory to usefull directories
+CREATE_USEFULL_SYMLINKS = 1
+
+YOCTO_RELEASE     = thud
+
+DOCKER_REGISTRY   = docker.evologics.de
+DOCKER_IMAGE      = evologics/yocto:$(YOCTO_RELEASE)
+
+SSTATE_CACHE_DIR  = share/$(YOCTO_RELEASE)/$(MACHINE)/sstate-cache
+################### begin build enviroment variable #########################
+# Change this if you have shared 'downloads' directory for yocto
+LOCAL_CONF_OPT_DL_DIR = $$$${TOPDIR}/../share/downloads
+
+# Change this if you have shared 'sstate-cache' directory for yocto
+LOCAL_CONF_OPT_SSTATE_DIR = $$$${TOPDIR}/../$(SSTATE_CACHE_DIR)
+
+# Change this if you want point tmp dir to RAM disk
+LOCAL_CONF_OPT_TMPDIR = $$$${TOPDIR}/tmp
+
+LOCAL_CONF_OPT_BB_NUMBER_THREADS  = 8
+LOCAL_CONF_OPT_PARALLEL_MAKE      = -j 8
+
+PROJ_TOP_DIR := $(abspath $(dir $(firstword $(MAKEFILE_LIST))))
 # Folders with source and build files
 SOURCES_DIR       = sources
 BUILD_DIR        ?= build-$(MACHINE)
 
 # If layer branch not set with "branch=" option, YOCTO_RELEASE will be used.
 # If layer has no such branch, 'master' branch will be used.
-YOCTO_RELEASE     = thud
+GIT_CLONE = git clone
+# Usefull for CI/CD to fetch less data
+#GIT_CLONE = git clone --single-branch
 
-# Docker settings
-DOCKER_IMAGE      = evologics/yocto
+ifneq ($(wildcard /usr/bin/time),)
+	TIME = /usr/bin/time -f "real %e user %U sys %S"
+endif
+
+################### end build enviroment variable ###########################
+
 DOCKER_WORK_DIR   = /work
 DOCKER_BIND       = -v $$(pwd):$(DOCKER_WORK_DIR) \
                     -v /etc/localtime:/etc/localtime:ro \
@@ -28,6 +62,13 @@ DOCKER_BIND       = -v $$(pwd):$(DOCKER_WORK_DIR) \
 
 ifneq ($(SSH_AUTH_SOCK),)
 	DOCKER_SSH_AUTH_SOCK = -v $(dir $(SSH_AUTH_SOCK)):$(dir $(SSH_AUTH_SOCK)) -e SSH_AUTH_SOCK=$(SSH_AUTH_SOCK)
+endif
+
+# Docker settings
+ifneq ($(USE_LOCAL_DOCKER_IMAGE),)
+	DOCKER_IMAGE := $(DOCKER_IMAGE)
+else
+	DOCKER_IMAGE := $(DOCKER_REGISTRY)/$(DOCKER_IMAGE)
 endif
 
 # Cmdline to run docker.
@@ -48,21 +89,49 @@ endif
 
 DOCKER_HOST_NAME=build-$(subst :,-,$(subst /,-,$(MACHINE)))
 
-# Include saved config
+################### begin helpers #########################
+# Filter out duplicated words in list
+uniq   = $(strip $(if $1,$(firstword $1) $(call uniq,$(filter-out $(firstword $1),$1))))
+
+# Reverse list
+reverse = $(if $(1),$(call reverse,$(wordlist 2,$(words $(1)),$(1)))) $(firstword $(1))
+
+# Just comma to use in macroses
+comma := ,
+
+# Start recording variables which will go to the local.conf file
+# If you want do redefine the variable VAR previously set, first use:
+#undefine VAR
+# Otherwise it will not be recorded and will not show up in local.conf
+define local_conf_options_begin
+    $(eval __VARIABLES_OLD := $(sort $(.VARIABLES)))
+endef
+
+define local_conf_options_set
+    $(if $(findstring pend, $(1)), \
+	    $(eval LOCAL_CONF_OPT += '$(1) = " $(2) "'), \
+	    $(eval LOCAL_CONF_OPT += '$(1) = "$(2)"') \
+	)
+endef
+
+# Actually add recorded variables to LOCAL_CONF_OPT
+define local_conf_options_end
+	$(if $(__VARIABLES_OLD), \
+		$(foreach v, $(sort $(.VARIABLES)), \
+			$(if $(filter-out __VARIABLES_OLD $(__VARIABLES_OLD),$(v)), \
+				$(call local_conf_options_set,$(v),$($v)) \
+			) \
+		)
+		$(eval undefine __VARIABLES_OLD)
+	,)
+endef
+################### end helpers ###########################
+
+# Include saved configs
 -include .config.mk
--include .ci-config.mk
+-include .build-host-config.mk
 # Use default MACHINE_CONFIG if it`s not defined
 MACHINE_CONFIG ?= default
-
-define add_to_local_conf_opt
-  $(foreach V, $(NEWVARS), \
-    $(if $(filter-out OLDVARS $(OLDVARS), $V), \
-	  $(if $(findstring pend, $V), \
-      $(eval LOCAL_CONF_OPT += '$V = " $($V) "'), \
-      $(eval LOCAL_CONF_OPT += '$V = "$($V)"') \
-	  )) \
-   )
-endef
 
 # Do not attempt to include something if running for bash completion
 # __BASH_MAKE_COMPLETION__will be set to 1 starting from bash-completion v2.2
@@ -70,9 +139,15 @@ ifneq ($(__BASH_MAKE_COMPLETION__),1)
   # Help and targets starting with 'list-*' and 'image-*' do not need MACHINE set
   ifneq ($(filter-out help list-% image-%,$(MAKECMDGOALS)),)
     ifeq ($(MACHINE),)
-      $(info Available machines are:)
-      $(foreach m_name, $(filter-out %common, $(notdir $(wildcard machine/*))), $(info $(m_name)))
-      $(error Variable MACHINE must be set!)
+      ifneq ($(shell test -t 0 && echo tty),)
+        ROOT_DIR:=$(dir $(realpath $(firstword $(MAKEFILE_LIST))))
+        $(shell $(ROOT_DIR)/lazyconf.sh > $$(tty))
+        -include .config.mk
+      else
+        $(info Available machines are:)
+        $(foreach m_name, $(filter-out %common, $(notdir $(wildcard machine/*))), $(info $(m_name)))
+        $(error Variable MACHINE must be set!)
+      endif
     endif
 
     # Include machine config with a possibility to override everything above
@@ -83,7 +158,6 @@ endif
 # Trick to remove duplicates from LAYERS
 $(eval LAYERS = $(sort $(LAYERS)))
 
-comma := ,
 # Iterate over lines in LAYERS and fill necessary variables
 $(foreach line, $(addprefix url=, $(LAYERS)),                               \
         $(eval line_sep = $(subst ;,  ,$(line)))                            \
@@ -107,35 +181,39 @@ $(foreach line, $(addprefix url=, $(LAYERS)),                               \
         ,                                                                   \
             $(eval LAYERS_DIR += $(dir))                                    \
         )                                                                   \
+        $(if $(value LAYER_$(name)_patches),                                \
+            $(eval LAYER_$(name)_patches :=                                 \
+                $(addprefix $(PROJ_TOP_DIR)/patches/$(name)/,               \
+                    $(subst $(comma),  ,$(LAYER_$(name)_patches)))),        \
+        )                                                                   \
  )
 
-.PHONY: help
+# Put LOCAL_CONF_OPT_* to LOCAL_CONF_OPT
+$(foreach v, $(filter LOCAL_CONF_OPT_%,$(.VARIABLES)),\
+    $(call local_conf_options_set,$(subst LOCAL_CONF_OPT_,,$(v)),$($v)) \
+)
+
+# help-section: Generic targets
+# help: Show help
 help:
-	@echo 'List targets:'
-	@echo ' list-machine    - Show available machines'
-	@echo ' list-config     - Show available configs for a given machine'
-	@echo ''
-	@echo 'Cleaning targets:'
-	@echo ' distclean       - Remove all generated files and directories'
-	@echo ' clean-bbconfigs - Remove bblayers.conf and local.conf files'
-	@echo ' clean-deploy    - Remove resulting target images and packages'
-	@echo ''
-	@echo 'Add/remove layers:'
-	@echo ' add-layer       - Add one or multiple layers'
-	@echo ' remove-layer    - Remove one or multiple layers. Necessary parameter: LAYERS="<layer1> <layer2>"'
-	@echo ''
-	@echo 'Working with repository:'
-	@echo ' package-index   - Rebuild package index of repository. This is needed after package adding/removing'
-	@echo ' ipk-server      - Start webserver for repository sharing. Package index will be rebuilded also'
-	@echo ''
-	@echo 'Working with docker image:'
-	@echo ' image-build     - Build docker image'
-	@echo ' image-clean     - Remove docker image'
-	@echo ' image-check     - Checking exising docker image, and if not - build it'
-	@echo ''
-	@echo 'Generic targets:'
-	@echo ' all       - Download docker image, yocto and meta layers and build image $(IMAGE_NAME) for machine $(MACHINE)'
-	@echo ' devshell  - Invoke developer shell. Can run command in CMD variable'
+	@echo Variables:
+	@echo 'USE_LOCAL_DOCKER_IMAGE=1  - Use local builded docker image. Disabled by default'
+	@echo 'CREATE_USEFULL_SYMLINKS=1 - Create symbolic links to usefull directories. Enabled by default'
+	@echo
+	@echo LOCAL_CONF_OPT_DL_DIR=\''$(LOCAL_CONF_OPT_DL_DIR)'\'
+	@echo LOCAL_CONF_OPT_SSTATE_DIR=\''$(LOCAL_CONF_OPT_SSTATE_DIR)'\'
+	@echo LOCAL_CONF_OPT_TMPDIR=\''$(LOCAL_CONF_OPT_TMPDIR)'\'
+	@echo LOCAL_CONF_OPT_BB_NUMBER_THREADS=\''$(LOCAL_CONF_OPT_BB_NUMBER_THREADS)'\'
+	@echo LOCAL_CONF_OPT_PARALLEL_MAKE=\''$(LOCAL_CONF_OPT_PARALLEL_MAKE)'\'
+	@echo
+	@echo YOCTO_RELEASE=$(YOCTO_RELEASE)
+	@echo DOCKER_REGISTRY=$(DOCKER_REGISTRY)
+	@echo DOCKER_IMAGE=$(DOCKER_IMAGE)
+	@# Parse Makefile to find "help-section: " and "help: " tockens, and show them
+	@sed -n -e 's/^# help-section: \(.*\)/printf "\n### %s\n" "\1"/p;t' \
+		-e 's/^# help: \(.*\)/\1/;t z' -e b -e ':z' \
+			-e 'N;s/\(.*\)\n\([^:]*\):.*/printf "%-20s - %s\\n" "\2" "\1"/p' \
+				$(firstword $(MAKEFILE_LIST)) | sh
 	@echo ''
 	@echo 'Also docker can be run directly:'
 	@echo '$$ $(DOCKER_RUN)'
@@ -153,9 +231,10 @@ help:
 	@echo ''
 	@echo 'Build binaries, images, SDK and updater for RoadRunner on EvoTiny by bitbake in interactive docker shell'
 	@echo '$$ make MACHINE=sama5d2-roadrunner-evo devshell'
-	@echo 'docker$$ bitbake virtual/kernel evologics-base-image swupdate-images-evo meta-toolchain packagegroup-erlang-embedded'
-	@echo 'docker$$ bitbake evologics-base-image -c do_populate_sdk'
-	@echo 'docker$$ bitbake evologics-base-image -c do_populate_sdk_ext'
+	@echo 'docker$$ bitbake virtual/kernel evologics-base-image swupdate-images-evo meta-toolchain '\
+		'packagegroup-erlang-embedded evologics-base-image:do_populate_sdk evologics-base-image:do_populate_sdk_ext'
+	@echo 'docker$$ bitbake evologics-base-image:do_populate_sdk'
+	@echo 'docker$$ bitbake evologics-base-image:do_populate_sdk_ext'
 	@echo ''
 	@echo 'Update package index of local repository'
 	@echo 'docker$$ bitbake package-index'
@@ -170,6 +249,9 @@ help:
 	@echo 'Create new recipe'
 	@echo 'docker$$ devtool add liblxc https://linuxcontainers.org/downloads/lxc/lxc-4.0.9.tar.gz'
 	@echo ''
+	@echo 'Deploy to target for testing'
+	@echo 'docker$$ devtool deploy-target dtach toor@10.14.179.1'
+	@echo ''
 	@echo 'Apply changes from external source tree to recipe'
 	@echo 'docker$$ devtool update-recipe --force-patch-refresh --a /work/sources/meta-evo linux-at91'
 	@echo ''
@@ -178,82 +260,165 @@ help:
 	@echo ''
 	@echo 'Finish working on a recipe in workspace (update-recipe + reset)'
 	@echo 'docker$$ devtool finish linux-at91 /work/sources/meta-evo'
+.PHONY: help
 
-.PHONY: list-machine list-config layers configure ci-deploy
-list-machine:
-	@ls -1 machine/ | grep -v common | sed '/$(MACHINE)[-.]/! s/\b$(MACHINE)\b/ * &/g'
+.build-host-config.mk:
+	@test -t 1 && echo Creating config .build-host-config.mk
+	@echo 'LOCAL_CONF_OPT_DL_DIR            ?= $(LOCAL_CONF_OPT_DL_DIR)'             > .build-host-config.mk
+	@echo 'LOCAL_CONF_OPT_SSTATE_DIR        ?= $(LOCAL_CONF_OPT_SSTATE_DIR)'        >> .build-host-config.mk
+	@echo 'LOCAL_CONF_OPT_TMPDIR            ?= $(LOCAL_CONF_OPT_TMPDIR)'            >> .build-host-config.mk
+	@echo 'LOCAL_CONF_OPT_BB_NUMBER_THREADS ?= $(LOCAL_CONF_OPT_BB_NUMBER_THREADS)' >> .build-host-config.mk
+	@echo 'LOCAL_CONF_OPT_PARALLEL_MAKE     ?= $(LOCAL_CONF_OPT_PARALLEL_MAKE)'     >> .build-host-config.mk
 
-list-config:
-	@echo " * $(MACHINE):"
-	@ls -1 machine/$(MACHINE)/ | grep .mk | sed 's/.mk\b//g' | sed '/$(MACHINE_CONFIG)[-.]/! s/\b$(MACHINE_CONFIG)\b/ * &/g'
-
-all: image-check $(SOURCES_DIR) layers $(BUILD_DIR) configure
-	@$(DOCKER_RUN) "bitbake $(IMAGE_NAME) $(MACHINE_BITBAKE_TARGETS)"
+# help: Download docker image, yocto and meta layers and build image \$(IMAGE_NAME) for machine \$(MACHINE)
+all: image-check $(PROJ_TOP_DIR)/$(SOURCES_DIR) $(LAYERS_DIR) $(BUILD_DIR) configure $(TARGET_ALL_DEPEND)
+	@$(TIME) $(DOCKER_RUN) "bitbake $(IMAGE_NAME) $(MACHINE_BITBAKE_TARGETS)"
 	@echo 'Result binaries and images you can find at $(BUILD_DIR)/tmp/deploy/'
+.PHONY: all
 
-devshell: image-check $(SOURCES_DIR) layers $(BUILD_DIR) configure
+# help: Invoke developer shell. Can run command in CMD variable
+devshell: image-check $(PROJ_TOP_DIR)/$(SOURCES_DIR) $(LAYERS_DIR) $(BUILD_DIR) configure
 	@$(DOCKER_RUN) $(CMD)
+.PHONY: devshell
 
-$(SOURCES_DIR):
-	git clone -b $(YOCTO_RELEASE) git://git.yoctoproject.org/poky.git $(SOURCES_DIR)
+$(PROJ_TOP_DIR)/$(SOURCES_DIR):
+	@$(GIT_CLONE) -b $(YOCTO_RELEASE) git://git.yoctoproject.org/poky.git $(PROJ_TOP_DIR)/$(SOURCES_DIR)
+	@if [ -n "$(LAYER_poky_patches)" ]; then \
+		cd $(PROJ_TOP_DIR)/$(SOURCES_DIR); \
+		git am $(PROJ_TOP_DIR)/patches/$(LAYER_poky_patches); \
+	fi
 
-layers: $(LAYERS_DIR)
-
-$(LAYERS_DIR):
-	cd $(SOURCES_DIR) && \
-		(git clone -b $(LAYER_$(@F)_branch) $(LAYER_$(@F)_url) || git clone $(LAYER_$(@F)_url))
+$(call uniq,$(LAYERS_DIR)):
+	@cd $(PROJ_TOP_DIR)/$(SOURCES_DIR) && \
+		($(GIT_CLONE) -b $(LAYER_$(@F)_branch) $(LAYER_$(@F)_url) || $(GIT_CLONE) $(LAYER_$(@F)_url))
+	@if [ -n "$(LAYER_$(@F)_srcrev)" ]; then      \
+		cd $(PROJ_TOP_DIR)/$(SOURCES_DIR)/$(@F); \
+		git checkout $(LAYER_$(@F)_srcrev);      \
+	fi
+	@if [ -n "$(LAYER_$(@F)_patches)" ]; then     \
+		cd $(PROJ_TOP_DIR)/$(SOURCES_DIR)/$(@F); \
+		git am $(LAYER_$(@F)_patches); \
+	fi
 
 $(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR)
 
+ifneq ($(CREATE_USEFULL_SYMLINKS),)
+    SYMLINK_TO_DIR_images = build/tmp/deploy/images/$(MACHINE)
+    SYMLINK_TO_DIR_ipk    = build/tmp/deploy/ipk
+    SYMLINK_TO_DIR_sdk    = build/tmp/deploy/sdk
+    SYMLINK_TO_DIR_kernel-source = build/tmp/work-shared/$(MACHINE)/kernel-source
+    SYMLINK_TO_DIR_kernel-build-artifacts = build/tmp/work-shared/$(MACHINE)/kernel-build-artifacts
+
+    $(foreach v, $(filter SYMLINK_TO_DIR_%,$(.VARIABLES)),\
+        $(eval USEFULL_SYMLINKS += $(patsubst SYMLINK_TO_DIR_%,%,$(v))) \
+    )
+
+$(USEFULL_SYMLINKS):
+	@ln -fsT $(SYMLINK_TO_DIR_$(@F)) $(@F)
+
+endif
+
+# help: Configure build system
 configure: $(BUILD_DIR)/conf/local.conf
 
+LOCAL_CONF_MARK = \#=== This block automatically generated. Do not change nothing there ===
 # Build directory is created by oe-init-build-env script,
 # which is called every run from container entrypoint script
-$(BUILD_DIR)/conf/local.conf:
-	@echo Creating new build directory: $(BUILD_DIR)
-	@$(DOCKER_RUN) "bitbake-layers add-layer $(addprefix $(DOCKER_WORK_DIR)/,$(LAYERS_DIR))"
-	@printf "%s\n" $(LOCAL_CONF_OPT) >> $(BUILD_DIR)/conf/local.conf
+$(BUILD_DIR)/conf/local.conf: $(PROJ_TOP_DIR)/$(SOURCES_DIR) $(LAYERS_DIR) $(BUILD_DIR) $(USEFULL_SYMLINKS)
+	@#Update symlink to build directory, in case it was changed by lazyconf
+	@ln -sfT $(BUILD_DIR) build
 
-	@echo Creating config .config.mk
+	@# if local.conf do not exist, it will be created by oe-init-build-env in docker/entrypoint.sh
+	@[ -f $(BUILD_DIR)/conf/local.conf ] && echo Update $@ || $(DOCKER_RUN) "echo Create $@"
+
+	@sed -i '/$(LOCAL_CONF_MARK)/,/$(LOCAL_CONF_MARK)/d' $(BUILD_DIR)/conf/local.conf
+	@echo '$(LOCAL_CONF_MARK)'                        >> $(BUILD_DIR)/conf/local.conf
+	@printf "%s\n" $(LOCAL_CONF_OPT)                  >> $(BUILD_DIR)/conf/local.conf
+	@echo '$(LOCAL_CONF_MARK)'                        >> $(BUILD_DIR)/conf/local.conf
+	@$(DOCKER_RUN) "bitbake-layers add-layer $(addprefix $(DOCKER_WORK_DIR)/,$(LAYERS_DIR))"
+
+	@echo Update .config.mk
 	@echo "MACHINE ?= $(MACHINE)" > .config.mk
 	@echo "MACHINE_CONFIG ?= $(MACHINE_CONFIG)" >> .config.mk
 
-	@ln -sf build/tmp/deploy/images/$(MACHINE) deploy-images
-	@ln -sf build/tmp/deploy/ipk deploy-ipk
+# help-section: List targets
+# help: Show available machines
+list-machine:
+	@ls -1 machine/ | grep -v common | sed '/$(MACHINE)[-.]/! s/\b$(MACHINE)\b/ * &/g'
+.PHONY: list-machine
 
-.PHONY: add-layer remove-layer clean-bbconfigs clean-deploy cleanall package-index ipk-server
-add-layer: configure layers
+# help: Show available configs for a given machine
+list-config:
+	@echo " * $(MACHINE):"
+	@ls -1 machine/$(MACHINE)/ | grep .mk | sed 's/.mk\b//g' | sed '/$(MACHINE_CONFIG)[-.]/! s/\b$(MACHINE_CONFIG)\b/ * &/g'
+.PHONY: list-config
+
+# help-section: Layers manipulation targets
+# help: Add one or multiple layers
+add-layer: configure $(LAYERS_DIR)
 	@for LAYER in $(LAYERS_DIR); do \
 	$(DOCKER_RUN) "bitbake-layers add-layer $(DOCKER_WORK_DIR)/$$LAYER"; \
 	done
+.PHONY: add-layer
 
+# WARNING: by default will be removed all layers. Dirty repo will be not removed'
+# help: Remove one or multiple layers. Necessary parameter: LAYERS='layer1 layer2'
 remove-layer: configure
 	@echo "REMOVING: $(LAYERS_DIR)"
+	@for LAYER in $(LAYERS_DIR); do \
+		cd $(PROJ_TOP_DIR)/$$LAYER; \
+		DIR="$(git rev-parse --show-toplevel)";\
+		[ -d "$$DIR" ] && cd $$DIR; \
+		if ! git diff --quiet; then \
+			echo "Layer $$LAYER are dirty. Will not remove"; \
+			exit 1; \
+		fi; \
+	done
 	@echo -n "Press Ctrl-C to cancel"
 	@for i in $$(seq 1 5); do echo -n "." && sleep 1; done
 	@echo
-	@for LAYER in $(LAYERS_DIR); do \
-	$(DOCKER_RUN) "bitbake-layers remove-layer $(DOCKER_WORK_DIR)/$$LAYER && rm -rf $(DOCKER_WORK_DIR)/$$LAYER"; \
+	@for LAYER in $(call reverse,$(LAYERS_DIR)); do \
+	    echo Removing $(DOCKER_WORK_DIR)/$$LAYER; \
+	    $(DOCKER_RUN) "bitbake-layers remove-layer $(DOCKER_WORK_DIR)/$$LAYER && \
+			rm -rf $(PROJ_TOP_DIR)/$$LAYER"; \
 	done
+.PHONY: remove-layers
 
-clean-bbconfigs:
+# help: Remove bblayers.conf and local.conf files
+clean-bbconfigs: clean-links
 	rm -f $(BUILD_DIR)/conf/local.conf $(BUILD_DIR)/conf/bblayers.conf deploy-images
+.PHONY: clean-bbconfigs
 
+# help: Remove useful symbolic links
+clean-links:
+	@rm -f build $(USEFULL_SYMLINKS)
+.PHONY: clean-links
+
+# help: Remove resulting target images and packages
 clean-deploy:
 	rm -rf $(BUILD_DIR)/tmp/deploy
+.PHONY: clean-deploy
 
+# help: Remove sstate-cache, all generated files and directories in build directory
 cleanall:
-	rm -rf $(BUILD_DIR)/tmp $(BUILD_DIR)/sstate-cache
+	rm -rf $(BUILD_DIR)/tmp $(PROJ_TOP_DIR)/share/$(YOCTO_RELEASE)/$(MACHINE)/sstate-cache
+.PHONY: cleanall
 
-distclean:
-	rm -rf $(BUILD_DIR) $(SOURCES_DIR) poky-container .config.mk
+# help: Remove build, source directory and .config.mk
+distclean: clean-links
+	rm -rf $(BUILD_DIR) $(PROJ_TOP_DIR)/$(SOURCES_DIR) .config.mk
+.PHONY: distclean
 
+# help-section Working with repository
+# help: Rebuild package index of repository. This is needed after package adding/removing'
 package-index:
 	@$(DOCKER_RUN) bitbake package-index
+.PHONY: package-index
 
+#help: Start webserver for repository sharing. Package index will be rebuilded also
 ipk-server: package-index
-	$(eval IP := $(firstword $(shell ip a | grep dynamic | grep -Po 'inet \K[\d.]+')))
+	$(eval IP := $(shell ip a | sed -n '/dynamic/s/.*inet \([^/]*\).*/\1/p;T;q'))
 	$(eval PORT := 8080)
 	@echo 'Assuming address $(IP):$(PORT)'
 	@echo ''
@@ -274,21 +439,71 @@ ipk-server: package-index
 	@cd $(BUILD_DIR)/tmp/deploy/; \
 		python3 -m http.server $(PORT) || \
 		python2 -m SimpleHTTPServer $(PORT)
+.PHONY: ipk-server
 
-.PHONY: image-build image-clean image-deploy image-check
+# help-section: Working with docker image
+# help: Build docker image
 image-build:
 	@cd docker && docker build -t $(DOCKER_IMAGE) .
+.PHONY: image-build
 
-image-clean:
-	@docker container ls | awk '"$(DOCKER_IMAGE)" == $$2{print $$1}' | xargs --no-run-if-empty docker container rm
-	@docker image ls | grep -qw '$(DOCKER_IMAGE)' && docker image rm $(DOCKER_IMAGE) || exit 0
+# help: Clean docker image and containers
+image-clean: docker-check
+	@docker container ls | awk '"$(DOCKER_IMAGE)$(suffix $@)" == $$1 && "$(YOCTO_RELEASE)" == $$2{print $$1":"$$2}' | \
+		xargs --no-run-if-empty docker container rm
+	@docker inspect --type=image $(DOCKER_IMAGE) > /dev/null 2>&1 && \
+		docker image rm $(DOCKER_IMAGE)$(suffix $@) || exit 0
+.PHONY: image-clean
 
-image-check:
+# help: Checking exising docker image, and if not - build or pull it
+image-check: docker-check
+ifneq ($(USE_LOCAL_DOCKER_IMAGE),)
 	@if ! docker inspect $(DOCKER_IMAGE) > /dev/null 2>&1; then \
 		echo WARNING: docker image $(DOCKER_IMAGE) do not exist. Build one>&2; \
 		$(MAKE) image-build; \
 	fi
+else
+	@if ! docker inspect $(DOCKER_IMAGE) > /dev/null 2>&1; then \
+		echo WARNING: docker image $(DOCKER_IMAGE) do not exist. Pull one>&2; \
+		$(MAKE) image-pull; \
+	fi
+.PHONY: image-check
 
-image-deploy:
+# help: Pull docker image from registry
+image-pull: docker-check registry-login
+	@docker pull $(DOCKER_IMAGE)
+.PHONY: image-pull
+
+# help: Push docker image to registry
+image-push: docker-check registry-login
 	@docker push $(DOCKER_IMAGE)
+endif
+.PHONY: image-push
 
+# help: Check if dockerd is running
+docker-check:
+	@docker ps > /dev/null
+.PHONY: docker-check
+
+# Naive implementation
+# Does not check for different image formats
+ci-deploy:
+	$(eval CI_DEP_DIR := $(CI_PATH:%/=%)/$(MACHINE)/$(MACHINE_CONFIG))
+	mkdir -p $(CI_DEP_DIR)
+	cp -L deploy-images/$(IMAGE_NAME)-$(MACHINE).tar.bz2 $(CI_DEP_DIR) \
+		|| exit 1
+	cp -L deploy-images/$(MACHINE).dtb $(CI_DEP_DIR) \
+		|| exit 1
+	cp -L deploy-images/modules-$(MACHINE).tgz $(CI_DEP_DIR) \
+		|| exit 1
+	cp -L deploy-images/u-boot-$(MACHINE).bin $(CI_DEP_DIR) \
+		|| exit 1
+	cp -L deploy-images/uImage-$(MACHINE).bin $(CI_DEP_DIR) \
+		|| cp -L deploy-images/zImage-$(MACHINE).bin $(CI_DEP_DIR) \
+		|| exit 1
+.PHONY: ci-deploy
+
+# help: Login to \$(DOCKER_REGISTRY) registry
+registry-login:
+	@docker login $(DOCKER_REGISTRY)
+.PHONY: registry-login

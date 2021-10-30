@@ -1,12 +1,21 @@
-== Docker/Yocto Build System Setup ==
+== Yocto/Docker Build System Setup ==
 This project helps make build system for embedded platform by using
 docker (https://www.docker.com) and yocto (https://www.yoctoproject.org/)
-with distro poky (https://www.yoctoproject.org/tools-resources/projects/poky)
+
+=== Preparations ===
+
+$ sudo apt install git make docker.io tzdata
+$ sudo adduser $USER docker
+
+If you will not build docker image by own, but pull it from registry, then:
+
+$ sudo apt-get install golang-docker-credential-helpers xauth dbus-x11
+$ mkdir -p ~/.docker
+$ echo '{ "credsStore": "secretservice" }' >  ~/.docker/config.json
 
 === Quick Start ===
-This will setup docker image 'crops/poky', download yocto and meta layers,
-setup local config and run building image 'core-image-minimal' and sdk for
-machine 'sama5d2-roadrunner-evo'.
+This will ask what machine config to apply, setup docker image 'evologics/yocto', download yocto and meta layers,
+setup local config and run building image and sdk.
 
 $ make all
 
@@ -23,6 +32,8 @@ $ make clean-bbconfigs
 $ make MACHINE=imx6-tx6s-8035-evobb configure
 After that given MACHINE and MACHINE_CONFIG will be saved to .config.mk file,
 so no need to pass them again after a 'configure' target
+
+You can also use ./lazyconf.sh to choose machine config.
 
 === Separating machine configs ===
 There are 'MACHINE' and 'MACHINE_CONFIG' parameters to change for different build configurations.

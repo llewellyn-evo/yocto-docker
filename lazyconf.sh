@@ -33,11 +33,14 @@ if [ -z "$machine" ]; then
     echo "$((${idx}+1)). ${machines[$idx]}"
   done
 
-  while true; do
-    echo -n "Choose machine [1..${#machines[@]}]: "
-    read ans
-    [ ! -z $ans ] && [ $ans -gt 0 ] && [ $ans -le ${#machines[@]} ] && break
-  done
+  ans=1
+  if [ ${#machines[@]} -ne 1 ]; then
+      while true; do
+        echo -n "Choose machine [1..${#machines[@]}]: "
+        read ans
+        [ ! -z $ans ] && [ $ans -gt 0 ] && [ $ans -le ${#machines[@]} ] && break
+      done
+  fi
   machine=${machines[$(($ans - 1))]}
 fi
 
@@ -59,14 +62,18 @@ if [ -z "$machine_config" ]; then
     echo "$((${idx}+1)). ${configs[$idx]}"
   done
 
-  while true; do
-    echo -n "Choose machine configuration [1..${#configs[@]}]: "
-    read ans
-    [ ! -z $ans ] && [ $ans -gt 0 ] && [ $ans -le ${#configs[@]} ] && break
-  done
+  ans=1
+  if [ ${#configs[@]} -ne 1 ]; then
+      while true; do
+        echo -n "Choose machine configuration [1..${#configs[@]}]: "
+        read ans
+        [ ! -z $ans ] && [ $ans -gt 0 ] && [ $ans -le ${#configs[@]} ] && break
+      done
+  fi
   machine_config=${configs[$(($ans - 1))]}
 fi
 
-[ -z "$2" ] && echo -e "\e[32mTip: use '$0 ${machine} ${machine_config}' for non-interactive mode.\e[0m"
+[ -z "$2" ] && [ -t 0 ] && \
+    echo -e "\e[32mTip: use '$0 ${machine} ${machine_config}' for non-interactive mode.\e[0m"
 
-make MACHINE=${machine} MACHINE_CONFIG=${machine_config} configure
+make MACHINE=${machine} MACHINE_CONFIG=${machine_config} clean-links configure

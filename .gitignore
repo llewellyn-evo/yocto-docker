@@ -1,7 +1,18 @@
 *.sw?
 .config.mk
+.build-host-config.mk
+build
 build*/
 poky-container/
 source*/
 home/*
 deploy-*
+
+# usefull links
+sdk
+share
+private
+images
+ipk
+kernel-build-artifacts
+kernel-source

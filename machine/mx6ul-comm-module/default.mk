@@ -9,6 +9,10 @@ LOCAL_CONF_OPT    += 'DISTRO  = "yogurt"'
 LOCAL_CONF_OPT += 'BBMASK            += ".*karo.*"'
 LOCAL_CONF_OPT += 'BBMASK            += ".*toradex.*"'
 LOCAL_CONF_OPT += 'BBMASK            += ".*at91.*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*rauc.*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*meta-yogurt/recipes-qt/.*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*meta-yogurt/recipes-images/.*"'
+LOCAL_CONF_OPT += 'BBMASK            += ".*meta-yogurt/recipes-examples/.*"'
 
 # Start recording variables which will go to te local.conf file
 # If you want do redefine the variable VAR previously set, first use:
@@ -21,6 +25,10 @@ OLDVARS := $(sort $(.VARIABLES))
 # busybox only supports menuconfig
 LOCAL_CONF_OPT    += 'KCONFIG_CONFIG_COMMAND = "nconfig"'
 LOCAL_CONF_OPT    += 'KCONFIG_CONFIG_COMMAND_pn-busybox = "menuconfig"'
+
+# Remove prefered version for nodejs-native,nodejs - declared in meta-yogurt
+LOCAL_CONF_OPT    += 'PREFERRED_VERSION_nodejs_remove = "8.%"'
+LOCAL_CONF_OPT    += 'PREFERRED_VERSION_nodejs-native_remove = "8.%"'
 
 # Must have for the platform
 LOCAL_CONF_OPT   += 'IMAGE_INSTALL_append = " rng-tools iproute2 coreutils grep bridge-utils iputils iperf3 net-tools"'
@@ -46,15 +54,11 @@ LOCAL_CONF_OPT   += 'IMAGE_ROOTFS_EXTRA_SPACE = "100000"'
 LOCAL_CONF_OPT   += 'PACKAGE_CLASSES = "package_ipk"'
 
 LOCAL_CONF_OPT   += 'TCLIBC = "glibc"'
+################ begin build/conf/local.conf options ###################
+$(call local_conf_options_begin)
 
-
-# Actually add recorded variables to LOCAL_CONF_OPT
-NEWVARS := $(sort $(.VARIABLES))
-
-$(call add_to_local_conf_opt)
-
-# Build dir
-BUILD_DIR         = build
+$(call local_conf_options_end)
+################ end build/conf/local.conf options #####################
 
 # If layer branch not set with "branch=" option, YOCTO_RELEASE will be used.
 # If layer has no such branch, 'master' branch will be used.
@@ -66,15 +70,19 @@ YOCTO_RELEASE     = thud
 # Possible options:
 # 	* branch=<branch-to-clone>
 # 	* subdirs=<subdirectory with meta-layer>[,<subdirectory with meta-layer>]
-LAYERS           += https://github.com/EvoLogics/meta-evo.git  				   				\
-                    git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-python,meta-networking,meta-filesystems,meta-initramfs,meta-multimedia,meta-perl,meta-webserver,\
-                    https://git.phytec.de/meta-phytec 									\
-                    https://git.phytec.de/meta-yogurt 									\
-                    https://github.com/OSSystems/meta-gstreamer1.0.git 							\
-                    https://github.com/meta-qt5/meta-qt5.git 								\
-                    https://github.com/rauc/meta-rauc.git 								\
-                    https://github.com/sbabic/meta-swupdate								\
-                    https://github.com/meta-erlang/meta-erlang.git;branch=zeus
+
+LAYERS	+= https://github.com/EvoLogics/meta-evo.git
+
+LAYERS	+= git://git.openembedded.org/meta-openembedded;subdirs=meta-oe,meta-python,meta-networking,meta-filesystems,meta-initramfs,meta-multimedia,meta-perl,meta-webserver
+
+LAYERS 	+= https://git.phytec.de/meta-phytec
+
+LAYERS	+= https://git.phytec.de/meta-yogurt;patches=0001-remove-dependency-qt5-rauc.patch
+
+LAYERS	+= https://github.com/sbabic/meta-swupdate
+
+LAYERS	+= https://github.com/meta-erlang/meta-erlang.git;branch=zeus;patches=0001-Enable-PARALLEL_MAKE.patch
+
 
 MACHINE_BITBAKE_TARGETS = meta-toolchain swupdate-images-evo-comm
 
