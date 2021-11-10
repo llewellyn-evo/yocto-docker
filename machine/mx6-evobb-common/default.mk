@@ -35,7 +35,7 @@ CORE_IMAGE_EXTRA_INSTALL   += evo-envinit
 
 PRSERV_HOST = localhost:0
 
-DISTRO_FEATURES_remove = bluetooth
+DISTRO_FEATURES_remove = bluetooth wayland
 EXTRA_IMAGE_FEATURES_append = package-management read-only-rootfs
 
 BBMASK_append               = .*at91.*
