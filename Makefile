@@ -121,8 +121,8 @@ define local_conf_options_end
 			$(if $(filter-out __VARIABLES_OLD $(__VARIABLES_OLD),$(v)), \
 				$(call local_conf_options_set,$(v),$($v)) \
 			) \
-		)
-		$(eval undefine __VARIABLES_OLD)
+		) \
+		$(eval undefine __VARIABLES_OLD) \
 	,)
 endef
 ################### end helpers ###########################
