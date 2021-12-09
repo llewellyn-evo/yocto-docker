@@ -3,6 +3,7 @@ IMAGE_NAME        = core-image-minimal
 
 # MACHINE is a must in local.conf
 LOCAL_CONF_OPT    = 'MACHINE = "$(MACHINE)"'
+BUILD_DIR         = build-mx6
 
 ################ begin build/conf/local.conf options ###################
 $(call local_conf_options_begin)
